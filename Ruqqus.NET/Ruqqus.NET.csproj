@@ -2,6 +2,31 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
+        <Title>Ruqqus.NET</Title>
+        <Authors>ForeverZer0</Authors>
+        <Description> A C# API implementation for Ruqqus, an open-source platform for online communities, free of censorship and moderator abuse by design.</Description>
+        <Copyright>Copyright © Eric Freed 2020</Copyright>
+        <PackageProjectUrl>https://ruqqus.com/</PackageProjectUrl>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageIconUrl>https://i.imgur.com/bgHpxyx.png</PackageIconUrl>
+        <RepositoryUrl>https://github.com/ForeverZer0/Ruqqus.NET</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>ruqqus;reddit;guild;guilds;community;communities</PackageTags>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="LICENSE.txt" Pack="true" PackagePath="$(PackageLicenseFile)"/>
+        <None Include="icon.png" Pack="true" PackagePath="/"/>
+    </ItemGroup>
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <NoWarn>1701;1702;CS0649</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <NoWarn>1701;1702;CS0649</NoWarn>
     </PropertyGroup>
 
 </Project>
