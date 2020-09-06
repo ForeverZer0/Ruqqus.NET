@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using JetBrains.Annotations;
 
 namespace Ruqqus.NET
 {
+
     public partial class RuqqusClient
     {
         /// <summary>
@@ -14,7 +16,7 @@ namespace Ruqqus.NET
         /// <param name="username">The username of the account to retrieve.</param>
         /// <returns>A <see cref="User"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="username"/> is not well-formatted.</exception>
-        [Authority(AuthorityKind.Required, OAuthScope.Read)]
+        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
         public async Task<User> GetUserAsync([NotNull] string username)
         {
             if (!IsValidUsername(username))
@@ -28,7 +30,7 @@ namespace Ruqqus.NET
         /// <param name="commentId">The ID of the comment to retrieve.</param>
         /// <returns>A <see cref="Comment"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="commentId"/> is not well-formatted.</exception>
-        [Authority(AuthorityKind.Required, OAuthScope.Read)]
+        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
         public async Task<Comment> GetCommentAsync([NotNull] string commentId)
         {
             if (!IsValidSubmissionId(commentId))
@@ -42,7 +44,7 @@ namespace Ruqqus.NET
         /// <param name="postId">The ID of the post to retrieve.</param>
         /// <returns>A <see cref="Post"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="postId"/> is not well-formatted.</exception>
-        [Authority(AuthorityKind.Required, OAuthScope.Read)]
+        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
         public async Task<Post> GetPostAsync([NotNull] string postId)
         {
             if (!IsValidSubmissionId(postId))
@@ -56,7 +58,7 @@ namespace Ruqqus.NET
         /// <param name="guildName">The name of the guild to retrieve.</param>
         /// <returns>A <see cref="Guild"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="guildName"/> is not well-formatted.</exception>
-        [Authority(AuthorityKind.Required, OAuthScope.Read)]
+        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
         public async Task<Guild> GetGuildAsync([NotNull] string guildName)
         {
             if (!IsValidGuildName(guildName))
@@ -78,16 +80,46 @@ namespace Ruqqus.NET
             {
                 var uri = new Uri(endpoint, UriKind.Relative);
                 var response = await httpClient.GetAsync(uri);
-                
-                var st = await response.Content.ReadAsStringAsync();
-                await using var stream = await response.Content.ReadAsStreamAsync();
-                return (T) serializer.ReadObject(stream);
+                response.EnsureSuccessStatusCode();
+                return JsonHelper.Load<T>(await response.Content.ReadAsStreamAsync());
             }
             catch (HttpRequestException)
             {
                 // Invalid value sent
                 return default;
             }
+        }
+
+        /// <summary>
+        /// Enumerates through each existing guild using the specified sorting method.
+        /// </summary>
+        /// <param name="sorting">The sorting method determining the order in which results are yielded.</param>
+        /// <returns>A collection of <see cref="Guild"/> instances.</returns>
+        /// <remarks>
+        ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
+        ///     expected behavior.
+        /// </remarks>
+        public async IAsyncEnumerable<Guild> GetGuilds(GuildSort sorting = GuildSort.Subs)
+        {
+            var sort = Enum.GetName(typeof(GuildSort), sorting)?.ToLowerInvariant() ?? "subs";
+            PageResults<Guild> guilds;
+            var page = 0;
+            
+            do
+            {
+                await AssertAuthorizationAsync();
+                var uri = new Uri($"/api/v1/guilds?sort={sort}&page={++page}", UriKind.Relative);
+                var response = await httpClient.GetAsync(uri);
+                response.EnsureSuccessStatusCode();
+                guilds = JsonHelper.Load<PageResults<Guild>>(await response.Content.ReadAsStreamAsync());
+
+                if (!string.IsNullOrEmpty(guilds.ErrorMessage))
+                    break;
+                
+                foreach (var guild in guilds.Items)
+                    yield return guild;
+                
+            } while (guilds.Items.Count >= ResultsPerPage);
         }
     }
 }

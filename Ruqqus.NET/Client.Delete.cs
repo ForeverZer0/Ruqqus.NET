@@ -1,6 +1,6 @@
 namespace Ruqqus.NET
 {
-    public partial class Client
+    public partial class RuqqusClient
     {
         
     }

@@ -26,6 +26,11 @@ namespace Ruqqus.NET
         public static readonly string UserAgent;
 
         /// <summary>
+        /// The number of results per page when enumerating over large collections.
+        /// </summary>
+        public const int ResultsPerPage = 25;
+
+        /// <summary>
         /// Static initializer.
         /// </summary>
         static RuqqusClient()
@@ -130,7 +135,7 @@ namespace Ruqqus.NET
         /// <param name="persist">Flag indicating if this token will persist and be reused more than once.</param>
         /// <returns>A newly created access token.</returns>
         /// <remarks>This action can only be performed once per code, and will fail otherwise.</remarks>
-        [Authority(AuthorityKind.None)]
+        [Authorization(AuthorityKind.None)]
         public async Task<OAuthToken> GrantTokenAsync([JetBrains.Annotations.NotNull] string code, bool persist = true)
         {
             var uri = new Uri("/oauth/grant", UriKind.Relative);
@@ -148,21 +153,26 @@ namespace Ruqqus.NET
         /// Refreshes a stale access token as needed. 
         /// </summary>
         /// <returns>A task indicating <c>true</c> if access token was refreshed, otherwise <c>false</c>.</returns>
-        [Authority(AuthorityKind.None)]
+        [Authorization(AuthorityKind.None)]
         public async Task<bool> RefreshTokenAsync()
         {
             if (Token?.RefreshToken is null || !Token.IsExpired)
                 return false;
 
+            // Can't call PostForm here, would call a stack overflow
             var uri = new Uri("/oauth/grant", UriKind.Relative);
-            var refreshToken = await PostForm<OAuthToken>(uri, new [] 
+            var content = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("grant_type", "refresh"),
                 new KeyValuePair<string, string>("client_id", ClientId),
                 new KeyValuePair<string, string>("client_secret", ClientSecret),
                 new KeyValuePair<string, string>("refresh_token", Token.RefreshToken), 
             });
-            
+
+            var response = await httpClient.PostAsync(uri, content);
+            response.EnsureSuccessStatusCode();
+
+            var refreshToken = JsonHelper.Load<OAuthToken>(await response.Content.ReadAsStreamAsync());
             token.Update(refreshToken);
             OnTokenRefreshed();
             return true;
