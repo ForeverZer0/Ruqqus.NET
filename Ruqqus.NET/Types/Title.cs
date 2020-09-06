@@ -29,7 +29,7 @@ namespace Ruqqus
         /// <summary>
         /// Gets the color of the text for the displayed title.
         /// </summary>
-        public Color Color => ColorTranslator.FromHtml(color);
+        public Color Color => ColorHelper.FromHtml(color);
 
         [field: DataMember(Name = "kind", IsRequired = true)]
         public int Kind { get; } // todo enum

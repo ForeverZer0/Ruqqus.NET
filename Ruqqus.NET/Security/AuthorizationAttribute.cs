@@ -1,7 +1,6 @@
 using System;
-using Ruqqus.Security;
 
-namespace Ruqqus
+namespace Ruqqus.Security
 {
     /// <summary>
     /// Metadata attribute to indicate the the permission and scope required to perform an action. 

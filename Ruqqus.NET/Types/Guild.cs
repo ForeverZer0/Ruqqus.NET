@@ -70,7 +70,7 @@ namespace Ruqqus
         /// <summary>
         /// Gets the accent color the guild uses for buttons, highlight, etc.
         /// </summary>
-        public Color Color => ColorTranslator.FromHtml(color);
+        public Color Color => ColorHelper.FromHtml(color);
 
         /// <summary>
         /// Gets the URL to the guild's profile image.

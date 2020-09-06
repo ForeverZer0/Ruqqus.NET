@@ -102,7 +102,7 @@ namespace Ruqqus
         public async IAsyncEnumerable<Guild> GetGuilds(GuildSort sorting = GuildSort.Subs)
         {
             var sort = Enum.GetName(typeof(GuildSort), sorting)?.ToLowerInvariant() ?? "subs";
-            PageResults<Guild> guilds;
+            PageResults<Guild> results;
             var page = 0;
             
             do
@@ -111,15 +111,15 @@ namespace Ruqqus
                 var uri = new Uri($"/api/v1/guilds?sort={sort}&page={++page}", UriKind.Relative);
                 var response = await httpClient.GetAsync(uri);
                 response.EnsureSuccessStatusCode();
-                guilds = JsonHelper.Load<PageResults<Guild>>(await response.Content.ReadAsStreamAsync());
+                results = JsonHelper.Load<PageResults<Guild>>(await response.Content.ReadAsStreamAsync());
 
-                if (!string.IsNullOrEmpty(guilds.ErrorMessage))
+                if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
                 
-                foreach (var guild in guilds)
+                foreach (var guild in results)
                     yield return guild;
                 
-            } while (guilds.Items.Count >= ResultsPerPage);
+            } while (results.IsFullPage);
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Ruqqus
         /// </remarks>
         public async IAsyncEnumerable<Post> GetFrontPage()
         {
-            PageResults<Post> posts;
+            PageResults<Post> results;
             var page = 0;
             do
             {
@@ -238,14 +238,14 @@ namespace Ruqqus
                 if (!response.IsSuccessStatusCode)
                     break;
                 
-                posts = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
-                if (!string.IsNullOrEmpty(posts.ErrorMessage))
+                results = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
+                if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
                 
-                foreach (var post in posts)
+                foreach (var post in results)
                     yield return post;
 
-            } while (posts.Items.Count >= ResultsPerPage);
+            } while (results.IsFullPage);
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Ruqqus
         /// <returns>A collection of <see cref="Comment"/> instances.</returns>
         public async IAsyncEnumerable<Comment> GetComments([NotNull] string guildName)
         {
-            PageResults<Comment> comments;
+            PageResults<Comment> results;
             var page = 0;
             do
             {
@@ -277,13 +277,13 @@ namespace Ruqqus
                 if (!response.IsSuccessStatusCode)
                     break;
                 
-                comments = JsonHelper.Load<PageResults<Comment>>(await response.Content.ReadAsStreamAsync());
-                if (!string.IsNullOrEmpty(comments.ErrorMessage))
+                results = JsonHelper.Load<PageResults<Comment>>(await response.Content.ReadAsStreamAsync());
+                if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
                 
-                foreach (var post in comments)
+                foreach (var post in results)
                     yield return post;
-            } while (comments.Items.Count >= 25);
+            } while (results.IsFullPage);
         }
 
         /// <summary>
@@ -336,7 +336,7 @@ namespace Ruqqus
         {
             var s = Enum.GetName(typeof(PostSort), sort)?.ToLowerInvariant() ?? "all";
             var f = Enum.GetName(typeof(PostFilter), filter)?.ToLowerInvariant() ?? "new";
-            PageResults<Post> posts;
+            PageResults<Post> results;
             var page = 0;
             
             do
@@ -347,14 +347,14 @@ namespace Ruqqus
                 if (!response.IsSuccessStatusCode)
                     break;
                 
-                posts = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
-                if (!string.IsNullOrEmpty(posts.ErrorMessage))
+                results = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
+                if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
                 
-                foreach (var post in posts)
+                foreach (var post in results)
                     yield return post;
                 
-            } while (posts.Items.Count >= 25);
+            } while (results.IsFullPage);
         }
     }
 }

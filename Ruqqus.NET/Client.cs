@@ -25,11 +25,6 @@ namespace Ruqqus
         public static readonly string UserAgent;
 
         /// <summary>
-        /// The number of results per page when enumerating over large collections.
-        /// </summary>
-        public const int ResultsPerPage = 25;
-
-        /// <summary>
         /// Static initializer.
         /// </summary>
         static Client()
