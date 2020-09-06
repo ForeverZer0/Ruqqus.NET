@@ -1,4 +1,4 @@
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
     /// Determines the sorting order when querying for collections of guilds.

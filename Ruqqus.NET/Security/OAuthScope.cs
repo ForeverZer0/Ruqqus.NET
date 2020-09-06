@@ -1,6 +1,6 @@
 using System;
 
-namespace Ruqqus.NET
+namespace Ruqqus.Security
 {
     /// <summary>
     /// Flags describing various degrees of functionality the application has been granted to perform.

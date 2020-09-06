@@ -1,9 +1,10 @@
 using System;
-using JetBrains.Annotations;
+using Ruqqus.Security;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
     /// Arguments used for when an access token is refreshed.
@@ -13,7 +14,7 @@ namespace Ruqqus.NET
         /// <summary>
         /// Gets the <see cref="Client"/> who refreshed the token.
         /// </summary>
-        public RuqqusClient Client { get; }
+        public Client Client { get; }
         
         /// <summary>
         /// Gets the token that was refreshed.
@@ -25,7 +26,7 @@ namespace Ruqqus.NET
         /// </summary>
         /// <param name="client">The <see cref="Client"/> who refreshed the token.</param>
         /// <param name="token">The token that was refreshed.</param>
-        public TokenRefreshedEventArgs([NotNull] RuqqusClient client, [NotNull] OAuthToken token)
+        public TokenRefreshedEventArgs([NotNull] Client client, [NotNull] OAuthToken token)
         {
             Client = client ?? throw new ArgumentNullException(nameof(client));
             Token = token ?? throw new ArgumentNullException(nameof(token));

@@ -1,10 +1,11 @@
 using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+using Ruqqus.Security;
+using Ruqqus.Types;
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
-    public partial class RuqqusClient
+    public partial class Client
     {
         /// <summary>
         /// Deletes a previously created comment.

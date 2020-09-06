@@ -1,4 +1,4 @@
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
     /// Describes filters that can be applied to post queries to limit the results.

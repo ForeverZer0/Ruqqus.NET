@@ -1,4 +1,4 @@
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
     /// Indicates the value of a vote on a comment or post.

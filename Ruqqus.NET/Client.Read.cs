@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+using Ruqqus.Security;
+using Ruqqus.Types;
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
 
-    public partial class RuqqusClient
+    public partial class Client
     {
         /// <summary>
         /// Asynchronously retrieves the <see cref="User"/> with the specified username.
@@ -202,12 +203,129 @@ namespace Ruqqus.NET
                 yield return post;
         }
 
-        
-        // public async IAsyncEnumerable<Post> GetAllPosts(PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
-        // {
-        //     
-        // }
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over every post on Ruqqus.
+        /// </summary>
+        /// <param name="filter">Determines the filter used for which results are returned.</param>
+        /// <param name="sort">Determines the order in which results are returned.</param>
+        /// <returns>A collection of <see cref="Post"/> instances.</returns>
+        /// <remarks>
+        ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
+        ///     expected behavior.
+        /// </remarks>
+        public async IAsyncEnumerable<Post> GetAllPosts(PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
+        {
+            await foreach (var post in GetPosts("/all/listing", filter, sort))
+                yield return post;
+        }
 
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating through the "home" page of Ruqqus..
+        /// </summary>
+        /// <returns>A collection of <see cref="Post"/> instances.</returns>
+        /// <remarks>
+        ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
+        ///     expected behavior.
+        /// </remarks>
+        public async IAsyncEnumerable<Post> GetFrontPage()
+        {
+            PageResults<Post> posts;
+            var page = 0;
+            do
+            {
+                await AssertAuthorizationAsync();
+                var uri = new Uri($"/api/v1/front/listing?{++page}", UriKind.Relative);
+                var response = await httpClient.GetAsync(uri);
+                if (!response.IsSuccessStatusCode)
+                    break;
+                
+                posts = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
+                if (!string.IsNullOrEmpty(posts.ErrorMessage))
+                    break;
+                
+                foreach (var post in posts)
+                    yield return post;
+
+            } while (posts.Items.Count >= ResultsPerPage);
+        }
+
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over comments of the specified <see cref="Guild"/>.
+        /// </summary>
+        /// <param name="guild">The guild whose comments will be retrieved.</param>
+        /// <returns>A collection of <see cref="Comment"/> instances.</returns>
+        public async IAsyncEnumerable<Comment> GetComments([NotNull] Guild guild)
+        {
+            if (guild is null)
+                throw new ArgumentNullException(nameof(guild));
+            await foreach (var comment in GetComments(guild.Name))
+                yield return comment;
+        }
+        
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over comments of the specified <see cref="Guild"/>.
+        /// </summary>
+        /// <param name="guildName">The name of the guild whose comments will be retrieved.</param>
+        /// <returns>A collection of <see cref="Comment"/> instances.</returns>
+        public async IAsyncEnumerable<Comment> GetComments([NotNull] string guildName)
+        {
+            PageResults<Comment> comments;
+            var page = 0;
+            do
+            {
+                var uri = new Uri($"/api/v1/guild/{guildName}/comments?page={++page}", UriKind.Relative);
+                var response = await httpClient.GetAsync(uri);
+                if (!response.IsSuccessStatusCode)
+                    break;
+                
+                comments = JsonHelper.Load<PageResults<Comment>>(await response.Content.ReadAsStreamAsync());
+                if (!string.IsNullOrEmpty(comments.ErrorMessage))
+                    break;
+                
+                foreach (var post in comments)
+                    yield return post;
+            } while (comments.Items.Count >= 25);
+        }
+
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over comments of the specified <see cref="Post"/>.
+        /// </summary>
+        /// <param name="post">The post whose comments will be retrieved.</param>
+        /// <returns>A collection of <see cref="Comment"/> instances.</returns>
+        /// <remarks>
+        ///     This is an expensive operation! There is no backend method to query the database directly, so this
+        ///     method must iterate through all comments in a guild and return only those belonging to a single post.
+        /// </remarks>
+        public async IAsyncEnumerable<Comment> GetPostComments([NotNull] Post post)
+        {
+            if (post is null)
+                throw new ArgumentNullException(nameof(post));
+            
+            await foreach (var comment in GetComments(post.GuildName))
+            {
+                if (comment.PostId == post.Id)
+                    yield return comment;
+            }
+        }
+        
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over comments of the specified <see cref="Post"/>.
+        /// </summary>
+        /// <param name="postId">The ID of the post whose comments will be retrieved.</param>
+        /// <returns>A collection of <see cref="Comment"/> instances.</returns>
+        /// <remarks>
+        ///     This is an expensive operation! There is no backend method to query the database directly, so this
+        ///     method must iterate through all comments in a guild and return only those belonging to a single post.
+        /// </remarks>
+        public async IAsyncEnumerable<Comment> GetPostComments([NotNull] string postId)
+        {
+            var post = await GetPostAsync(postId);
+            if (post is null)
+                yield break;
+            await foreach (var comment in GetPostComments(post))
+                yield return comment;
+        }
+        
         /// <summary>
         /// Returns an enumerator for asynchronously iterating over posts the specified base <paramref name="url"/>.
         /// </summary>
@@ -227,14 +345,15 @@ namespace Ruqqus.NET
                 await AssertAuthorizationAsync();
                 var uri = new Uri($"{url}?sort={s}&filter={f}&page={++page}", UriKind.Relative);
                 var response = await httpClient.GetAsync(uri);
-                response.EnsureSuccessStatusCode();
+                if (!response.IsSuccessStatusCode)
+                    break;
+                
                 posts = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
-
                 if (!string.IsNullOrEmpty(posts.ErrorMessage))
                     break;
                 
-                foreach (var guild in posts)
-                    yield return guild;
+                foreach (var post in posts)
+                    yield return post;
                 
             } while (posts.Items.Count >= 25);
         }

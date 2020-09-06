@@ -1,4 +1,4 @@
-namespace Ruqqus.NET
+namespace Ruqqus.Security
 {
     /// <summary>
     /// Indicates the level of authority required to perform certain functionality.

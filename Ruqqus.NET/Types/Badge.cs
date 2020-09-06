@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Ruqqus.NET
+namespace Ruqqus.Types
 {
     /// <summary>
     /// Represents a earned trophy that is displayed on the user's account page.

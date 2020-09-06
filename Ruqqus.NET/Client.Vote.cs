@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+using Ruqqus.Types;
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
-    public partial class RuqqusClient
+    public partial class Client
     {
         /// <summary>
         /// Submits a vote on a <see cref="Comment"/>.

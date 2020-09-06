@@ -4,9 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     public static class ImgurHelper
     {
@@ -28,7 +27,7 @@ namespace Ruqqus.NET
 
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(RuqqusClient.UserAgent);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(Client.UserAgent);
             client.DefaultRequestHeaders.Add("Authorization", $"Client-ID {clientId}");
 
             await using var stream = File.OpenRead(imagePath);

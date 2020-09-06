@@ -1,4 +1,4 @@
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
     /// Determines the sorting order when querying for collections of guilds.
@@ -21,7 +21,7 @@ namespace Ruqqus.NET
         Top,
             
         /// <summary>
-        /// Sort by the posts who have received a number of 
+        /// Sort by the recent posts that have a close ratio of up/down votes.
         /// </summary> 
         Disputed, // TODO
             

@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
     /// Basic response that simply indicates if an error occured or not.

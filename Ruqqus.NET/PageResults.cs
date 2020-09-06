@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Ruqqus.Types;
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
-    /// Represents a "page" of results, where each page contains <see cref="RuqqusClient.ResultsPerPage"/> results.
+    /// Represents a "page" of results, where each page contains <see cref="Client.ResultsPerPage"/> results.
     /// </summary>
     /// <typeparam name="T">A type derived from <see cref="InfoBase"/> that is contained on the pages.</typeparam>
     [DataContract, KnownType(typeof(Guild))]

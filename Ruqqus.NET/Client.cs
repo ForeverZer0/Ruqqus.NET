@@ -9,16 +9,16 @@ using System.Runtime.Serialization.Json;
 using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+using Ruqqus.Security;
+using Ruqqus.Types;
 
-
-namespace Ruqqus.NET
+namespace Ruqqus
 {
     /// <summary>
     /// A client for interacting and perfomring operations with the Ruqqus API.
     /// </summary>
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-    public partial class RuqqusClient : IDisposable
+    public partial class Client : IDisposable
     {
         /// <summary>
         /// The user-agent of Ruqqus.NET.
@@ -33,7 +33,7 @@ namespace Ruqqus.NET
         /// <summary>
         /// Static initializer.
         /// </summary>
-        static RuqqusClient()
+        static Client()
         {
             var assembly = Assembly.GetExecutingAssembly();
             var info = FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -119,11 +119,6 @@ namespace Ruqqus.NET
         /// <param name="id">The ID for a post or comment.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
         public static bool IsValidSubmissionId([CanBeNull] string id) => id != null && ValidSubmission.IsMatch(id);
-        
-        /// <summary>
-        /// Occurs when the client's current access token is refreshed.
-        /// </summary>
-        public event EventHandler<TokenRefreshedEventArgs> TokenRefreshed;
 
         /// <summary>
         /// Gets or sets the authorization token granting access to the client/
@@ -141,12 +136,12 @@ namespace Ruqqus.NET
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="RuqqusClient"/> class.
+        /// Creates a new instance of the <see cref="Client"/> class.
         /// </summary>
         /// <param name="clientId">The client ID of the application requesting access.</param>
         /// <param name="clientSecret">The client secret of the application requesting access.</param>
         /// <exception cref="ArgumentNullException">Thrown when the ID/secret is null or empty.</exception>
-        public RuqqusClient(string clientId, string clientSecret)
+        public Client(string clientId, string clientSecret)
         {
             ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
             ClientSecret = clientSecret ?? throw new ArgumentNullException(nameof(clientSecret));
@@ -157,13 +152,13 @@ namespace Ruqqus.NET
         }
         
         /// <summary>
-        /// Creates a new instance of the <see cref="RuqqusClient"/> class with the specified <see cref="OAuthToken"/>.
+        /// Creates a new instance of the <see cref="Client"/> class with the specified <see cref="OAuthToken"/>.
         /// </summary>
         /// <param name="clientId">The client ID of the application requesting access.</param>
         /// <param name="clientSecret">The client secret of the application requesting access.</param>
         /// <param name="token">A previously authorized access token.</param>
         /// <exception cref="ArgumentNullException">Thrown when the ID/secret is null or empty.</exception>
-        public RuqqusClient([JetBrains.Annotations.NotNull] string clientId, [JetBrains.Annotations.NotNull] string clientSecret, [JetBrains.Annotations.NotNull] OAuthToken token) : this(clientId, clientSecret)
+        public Client([NotNull] string clientId, [NotNull] string clientSecret, [NotNull] OAuthToken token) : this(clientId, clientSecret)
         {
             Token = token ?? throw new ArgumentNullException(nameof(token));
         }
@@ -177,7 +172,7 @@ namespace Ruqqus.NET
         /// <returns>A newly created access token.</returns>
         /// <remarks>This action can only be performed once per code, and will fail otherwise.</remarks>
         [Authorization(AuthorityKind.None)]
-        public async Task<OAuthToken> GrantTokenAsync([JetBrains.Annotations.NotNull] string code, bool persist = true)
+        public async Task<OAuthToken> GrantTokenAsync([NotNull] string code, bool persist = true)
         {
             var uri = new Uri("/oauth/grant", UriKind.Relative);
             return await PostForm<OAuthToken>(uri, new [] 
@@ -186,7 +181,7 @@ namespace Ruqqus.NET
                 new KeyValuePair<string, string>("client_id", ClientId),
                 new KeyValuePair<string, string>("client_secret", ClientSecret),
                 new KeyValuePair<string, string>("code", code), 
-                new KeyValuePair<string, string>("permenant", persist ? "persist" : "nope"), 
+                new KeyValuePair<string, string>("permanent", persist ? "persist" : "nope"), 
             });
         }
 
@@ -200,7 +195,7 @@ namespace Ruqqus.NET
             if (Token?.RefreshToken is null || Token.RemainingSeconds > OAuthToken.RefreshMargin)
                 return false;
 
-            // Can't call PostForm here, would call a stack overflow
+            // Can't call PostForm here, would cause a stack overflow (ask me how I know)
             var uri = new Uri("/oauth/grant", UriKind.Relative);
             var content = new FormUrlEncodedContent(new[]
             {
@@ -217,16 +212,6 @@ namespace Ruqqus.NET
             token.Update(refreshToken);
             OnTokenRefreshed();
             return true;
-        }
-
-        /// <summary>
-        /// Updates the client's authorization header and invokes the <see cref="TokenRefreshed"/> event.
-        /// </summary>
-        protected virtual void OnTokenRefreshed()
-        {
-            var header = new AuthenticationHeaderValue(token.Type, token.AccessToken);
-            httpClient.DefaultRequestHeaders.Authorization = header;
-            TokenRefreshed?.Invoke(this, new TokenRefreshedEventArgs(this, Token));
         }
 
         private async Task AssertAuthorizationAsync(bool required = true)

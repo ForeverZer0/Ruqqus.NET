@@ -1,11 +1,11 @@
-﻿﻿using System;
+﻿using System;
 using System.Runtime.Serialization;
 
 // ReSharper disable UnassignedGetOnlyAutoProperty
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Ruqqus.NET
+namespace Ruqqus.Types
 {
     /// <summary>
     /// Abstract base class for all major API entities.

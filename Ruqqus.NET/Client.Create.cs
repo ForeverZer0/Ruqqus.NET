@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+using Ruqqus.Security;
+using Ruqqus.Types;
 
-namespace Ruqqus.NET
+namespace Ruqqus
 {
-    public partial class RuqqusClient
+    public partial class Client
     {
         /// <summary>
         /// Creates and posts a new comment in reply to the specified <paramref name="parent"/> comment.
