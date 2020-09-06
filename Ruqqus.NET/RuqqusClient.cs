@@ -216,9 +216,9 @@ namespace Ruqqus.NET
             var content = new FormUrlEncodedContent(parameters);
             var response = await httpClient.PostAsync(uri, content);
             response.EnsureSuccessStatusCode();
-            
-            using (var stream = await response.Content.ReadAsStreamAsync())
-                return JsonHelper.Load<T>(stream);
+
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            return JsonHelper.Load<T>(stream);
         }
     }
 }
