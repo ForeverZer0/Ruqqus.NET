@@ -24,7 +24,7 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "is_banned", EmitDefaultValue = true, IsRequired = false)]
         public bool IsBanned { get; }
-        
+
         /// <summary>
         /// Gets the reason the user was banned, or <c>null</c> if entity has not been banned.
         /// </summary>
@@ -43,7 +43,7 @@ namespace Ruqqus
                 return DateTime.UnixEpoch + TimeSpan.FromSeconds(utc);
             }
         }
-        
+
         /// <summary>
         /// Gets the permanent direct link to this entity.
         /// </summary>
@@ -84,9 +84,9 @@ namespace Ruqqus
         public static bool operator !=(InfoBase left, InfoBase right) => !Equals(left, right);
 
         [DataMember(Name = "created_utc", IsRequired = false, EmitDefaultValue = true)]
-        private long utc ;
+        private long utc;
 
-        [DataMember(Name = "permalink",  IsRequired = false)]
+        [DataMember(Name = "permalink", IsRequired = false)]
         private string permalink;
     }
 }

@@ -11,7 +11,8 @@ namespace Ruqqus
     /// <summary>
     /// Represents a Ruqqus.NET user account.
     /// </summary>
-    [DataContract] [KnownType(typeof(InfoBase)), KnownType(typeof(Badge)), KnownType(typeof(Title))]
+    [DataContract]
+    [KnownType(typeof(InfoBase)), KnownType(typeof(Badge)), KnownType(typeof(Title))]
     public class User : InfoBase
     {
         /// <summary>
@@ -31,7 +32,7 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "post_rep")]
         public int PostRep { get; }
-        
+
         /// <summary>
         /// Gets the amount of rep the user has earned from comments.
         /// </summary>
@@ -70,13 +71,13 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "title", IsRequired = false)]
         public Title Title { get; }
-        
+
         /// <summary>
         /// Gets a brief user-submitted summary/biography associated with the user. 
         /// </summary>
         [field: DataMember(Name = "bio")]
         public string Bio { get; }
-        
+
         /// <summary>
         /// Gets a brief user-submitted summary/biography associated with the user in HTML format.
         /// </summary>
@@ -105,13 +106,10 @@ namespace Ruqqus
         /// <inheritdoc />
         public override string ToString() => Username;
 
-        [DataMember(Name = "banner_url")]
-        private string banner;
-        
-        [DataMember(Name = "profile_url")]
-        private string profile;
+        [DataMember(Name = "banner_url")] private string banner;
 
-        [DataMember(Name = "badges")]
-        private List<Badge> badges;
+        [DataMember(Name = "profile_url")] private string profile;
+
+        [DataMember(Name = "badges")] private List<Badge> badges;
     }
 }

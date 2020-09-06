@@ -37,31 +37,31 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "description")]
         public string Description { get; }
-        
+
         /// <summary>
         /// Gets the description of the guild in HTML format.
         /// </summary>
         [field: DataMember(Name = "description_html")]
         public string DescriptionHtml { get; }
-        
+
         /// <summary>
         /// Gets a value indicating if guild contains adult content.
         /// </summary>
         [field: DataMember(Name = "over_18")]
         public bool IsNsfw { get; }
-        
+
         /// <summary>
         /// Gets a value indicating if see the posts of the guild requires membership.
         /// </summary>
         [field: DataMember(Name = "is_private")]
         public bool IsPrivate { get; }
-        
+
         /// <summary>
         /// Gets a value indicated if posting is restricted in this guild pending guildmaster approval.
         /// </summary>
         [field: DataMember(Name = "is_restricted")]
         public bool IsRestricted { get; }
-        
+
         /// <summary>
         /// Gets the full-length ID of this guild.
         /// </summary>
@@ -76,8 +76,9 @@ namespace Ruqqus
         /// <summary>
         /// Gets the URL to the guild's profile image.
         /// </summary>
-        public Uri ProfileUrl => string.IsNullOrEmpty(profileUrl) ? null : new Uri(profileUrl, UriKind.RelativeOrAbsolute);
-        
+        public Uri ProfileUrl =>
+            string.IsNullOrEmpty(profileUrl) ? null : new Uri(profileUrl, UriKind.RelativeOrAbsolute);
+
         /// <summary>
         /// Gets the URL to the guild's banner image.
         /// </summary>
@@ -86,13 +87,10 @@ namespace Ruqqus
         /// <inheritdoc />
         public override string ToString() => Name;
 
-        [DataMember(Name = "profile_url")]
-        private string profileUrl;
-        
-        [DataMember(Name = "banner_url")]
-        private string bannerUrl;
+        [DataMember(Name = "profile_url")] private string profileUrl;
 
-        [DataMember(Name = "color")]
-        private string color;
+        [DataMember(Name = "banner_url")] private string bannerUrl;
+
+        [DataMember(Name = "color")] private string color;
     }
 }

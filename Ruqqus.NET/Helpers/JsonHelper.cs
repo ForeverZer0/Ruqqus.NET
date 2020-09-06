@@ -22,7 +22,7 @@ namespace Ruqqus.Helpers
             using var stream = File.OpenRead(filename);
             return Load<T>(stream);
         }
-        
+
         /// <summary>
         /// Deserializes the JSON data in <paramref name="stream"/> into an instance of <typeparamref name="T"/>.
         /// </summary>
@@ -85,7 +85,7 @@ namespace Ruqqus.Helpers
         {
             if (string.IsNullOrEmpty(jsonString))
                 throw new ArgumentNullException(nameof(jsonString));
-            
+
             var serializer = new DataContractJsonSerializer(typeof(T));
             var utf8 = Encoding.UTF8.GetBytes(jsonString);
             using var stream = new MemoryStream(utf8);

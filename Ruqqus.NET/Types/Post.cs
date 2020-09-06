@@ -10,7 +10,8 @@ namespace Ruqqus
     /// <summary>
     /// Represents a post submission on Ruqqus.NET.
     /// </summary>
-    [DataContract][KnownType(typeof(Submission))]
+    [DataContract]
+    [KnownType(typeof(Submission))]
     public class Post : Submission
     {
         /// <summary>
@@ -18,13 +19,13 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "author_title")]
         public Title AuthorTitle { get; }
-        
+
         /// <summary>
         /// Gets the number of comments that have been made within this post.
         /// </summary>
         [field: DataMember(Name = "comment_count")]
         public int CommentCount { get; }
-        
+
         /// <summary>
         /// Gets the name of the guild this post was originally submitted to.
         /// </summary>
@@ -34,7 +35,8 @@ namespace Ruqqus
         /// <summary>
         /// Gets the link the post is sharing, or <c>null</c> if none was supplied.
         /// </summary>
-        public Uri Url => string.IsNullOrEmpty(url) ? null : new Uri(url, UriKind.Absolute); // TODO test with links to other posts
+        public Uri Url =>
+            string.IsNullOrEmpty(url) ? null : new Uri(url, UriKind.Absolute); // TODO test with links to other posts
 
         /// <summary>
         /// Gets the link to the post's thumbnail image, or <c>null</c> if it has none.
@@ -53,19 +55,16 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "title")]
         public string Title { get; }
-        
+
         /// <summary>
         /// Gets the embed link for this post.
         /// </summary>
         public Uri EmbedUrl => string.IsNullOrEmpty(embedUrl) ? null : new Uri(embedUrl, UriKind.RelativeOrAbsolute);
-        
-        [DataMember(Name = "url")]
-        private string url;
-        
-        [DataMember(Name = "thumb_url")]
-        private string thumbUrl;
 
-        [DataMember(Name = "embed_url")]
-        private string embedUrl;
+        [DataMember(Name = "url")] private string url;
+
+        [DataMember(Name = "thumb_url")] private string thumbUrl;
+
+        [DataMember(Name = "embed_url")] private string embedUrl;
     }
 }

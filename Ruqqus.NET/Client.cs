@@ -38,13 +38,13 @@ namespace Ruqqus
             ValidUsername = new Regex("^[a-zA-Z0-9_]{5,25}$", opts);
             ValidGuildName = new Regex("^[a-zA-Z0-9][a-zA-Z0-9_]{2,24}$", opts);
             ValidSubmission = new Regex("^[A-Za-z0-9_]+$", opts);
-            
+
             UserSerializer = new DataContractJsonSerializer(typeof(User));
             GuildSerializer = new DataContractJsonSerializer(typeof(Guild));
             CommentSerializer = new DataContractJsonSerializer(typeof(Comment));
             PostSerializer = new DataContractJsonSerializer(typeof(Post));
         }
-        
+
         private static readonly Regex ValidUsername;
         private static readonly Regex ValidGuildName;
         private static readonly Regex ValidSubmission;
@@ -63,7 +63,7 @@ namespace Ruqqus
         {
             return await IsAvailable("https://ruqqus.com/api/is_available/", ValidUsername, username);
         }
-        
+
         /// <summary>
         /// Checks if the specified guild name is both valid and available.
         /// </summary>
@@ -81,7 +81,7 @@ namespace Ruqqus
                 return false;
             if (!validator.IsMatch(name))
                 return false;
-            
+
             using var client = new HttpClient();
             client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
             var uri = new Uri($"{route}{name}", UriKind.Absolute);
@@ -90,23 +90,23 @@ namespace Ruqqus
             var result = await response.Content.ReadAsStringAsync();
 
             return Regex.IsMatch(result, @":true\b");
-
         }
-        
-        
+
         /// <summary>
         /// Validates an input string and returns value indicating if it is a valid username.
         /// </summary>
         /// <param name="username">The username to check.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
-        public static bool IsValidUsername([CanBeNull] string username) => username != null && ValidUsername.IsMatch(username);
-        
+        public static bool IsValidUsername([CanBeNull] string username) =>
+            username != null && ValidUsername.IsMatch(username);
+
         /// <summary>
         /// Validates an input string and returns value indicating if it is a valid guild name.
         /// </summary>
         /// <param name="guildName">The name of the guild.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
-        public static bool IsValidGuildName([CanBeNull] string guildName) => guildName != null && ValidGuildName.IsMatch(guildName);
+        public static bool IsValidGuildName([CanBeNull] string guildName) =>
+            guildName != null && ValidGuildName.IsMatch(guildName);
 
         /// <summary>
         /// Validates an input string and returns value indicating if it is a valid ID for a post/comment.
@@ -124,8 +124,8 @@ namespace Ruqqus
             set
             {
                 token = value;
-                httpClient.DefaultRequestHeaders.Authorization = value is null 
-                    ? null 
+                httpClient.DefaultRequestHeaders.Authorization = value is null
+                    ? null
                     : new AuthenticationHeaderValue(value.Type, value.AccessToken);
             }
         }
@@ -145,7 +145,7 @@ namespace Ruqqus
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-        
+
         /// <summary>
         /// Creates a new instance of the <see cref="Client"/> class with the specified <see cref="OAuthToken"/>.
         /// </summary>
@@ -153,11 +153,12 @@ namespace Ruqqus
         /// <param name="clientSecret">The client secret of the application requesting access.</param>
         /// <param name="token">A previously authorized access token.</param>
         /// <exception cref="ArgumentNullException">Thrown when the ID/secret is null or empty.</exception>
-        public Client([NotNull] string clientId, [NotNull] string clientSecret, [NotNull] OAuthToken token) : this(clientId, clientSecret)
+        public Client([NotNull] string clientId, [NotNull] string clientSecret, [NotNull] OAuthToken token) : this(
+            clientId, clientSecret)
         {
             Token = token ?? throw new ArgumentNullException(nameof(token));
         }
-        
+
         /// <summary>
         /// Authorizes the application to perform actions as a user, using the authorization code from the redirect URL
         /// when the user made approval.
@@ -170,14 +171,15 @@ namespace Ruqqus
         public async Task<OAuthToken> GrantTokenAsync([NotNull] string code, bool persist = true)
         {
             var uri = new Uri("/oauth/grant", UriKind.Relative);
-            return await PostForm<OAuthToken>(uri, new [] 
-            {
-                new KeyValuePair<string, string>("grant_type", "code"),
-                new KeyValuePair<string, string>("client_id", ClientId),
-                new KeyValuePair<string, string>("client_secret", ClientSecret),
-                new KeyValuePair<string, string>("code", code), 
-                new KeyValuePair<string, string>("permanent", persist ? "persist" : "nope"), 
-            });
+            return await PostForm<OAuthToken>(uri,
+                new[]
+                {
+                    new KeyValuePair<string, string>("grant_type", "code"),
+                    new KeyValuePair<string, string>("client_id", ClientId),
+                    new KeyValuePair<string, string>("client_secret", ClientSecret),
+                    new KeyValuePair<string, string>("code", code),
+                    new KeyValuePair<string, string>("permanent", persist ? "persist" : "nope"),
+                });
         }
 
         /// <summary>
@@ -197,7 +199,7 @@ namespace Ruqqus
                 new KeyValuePair<string, string>("grant_type", "refresh"),
                 new KeyValuePair<string, string>("client_id", ClientId),
                 new KeyValuePair<string, string>("client_secret", ClientSecret),
-                new KeyValuePair<string, string>("refresh_token", Token.RefreshToken), 
+                new KeyValuePair<string, string>("refresh_token", Token.RefreshToken),
             });
 
             var response = await httpClient.PostAsync(uri, content);
@@ -217,14 +219,15 @@ namespace Ruqqus
                     throw new AuthenticationException("Application authentication is required for this action.");
                 return;
             }
+
             await RefreshTokenAsync();
         }
-        
+
         private readonly HttpClient httpClient;
         protected readonly string ClientId;
         protected readonly string ClientSecret;
         private OAuthToken token;
-        
+
         public void Dispose()
         {
             httpClient.Dispose();
@@ -233,7 +236,7 @@ namespace Ruqqus
         private async Task<T> PostForm<T>(Uri uri, IEnumerable<KeyValuePair<string, string>> parameters)
         {
             await AssertAuthorizationAsync();
-            
+
             var content = new FormUrlEncodedContent(parameters);
             var response = await httpClient.PostAsync(uri, content);
             response.EnsureSuccessStatusCode();

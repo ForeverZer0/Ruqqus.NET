@@ -20,7 +20,7 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "id", IsRequired = true)]
         public string Id { get; }
-        
+
         /// <summary>
         /// Gets the text displayed for this title.
         /// </summary>
@@ -69,7 +69,7 @@ namespace Ruqqus
         /// <param name="right">The second object to compare.</param>
         /// <returns><c>true</c> if objects are not equal, otherwise <c>false</c>.</returns>
         public static bool operator !=(Title left, Title right) => !Equals(left, right);
-        
+
         [DataMember(Name = "color", IsRequired = true)]
         private string color;
     }

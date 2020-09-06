@@ -24,7 +24,7 @@ namespace Ruqqus
                 throw new FormatException("Invalid username.");
             return await QueryObjectAsync<User>($"/api/v1/user/{username}", UserSerializer);
         }
-        
+
         /// <summary>
         /// Asynchronously retrieves the <see cref="Comment"/> with the specified ID.
         /// </summary>
@@ -38,7 +38,7 @@ namespace Ruqqus
                 throw new FormatException("Invalid comment ID.");
             return await QueryObjectAsync<Comment>($"/api/v1/comment/{commentId}", CommentSerializer);
         }
-        
+
         /// <summary>
         /// Asynchronously retrieves the <see cref="Post"/> with the specified ID.
         /// </summary>
@@ -66,7 +66,7 @@ namespace Ruqqus
                 throw new FormatException("Invalid guild name.");
             return await QueryObjectAsync<Guild>($"/api/v1/guild/{guildName}", GuildSerializer);
         }
-        
+
         /// <summary>
         /// Invokes the REST API to get a JSON object to deserialize.  
         /// </summary>
@@ -74,7 +74,8 @@ namespace Ruqqus
         /// <param name="serializer">A JSON serializer for the given type.</param>
         /// <typeparam name="T">A type that inherits from <see cref="InfoBase"/>.</typeparam>
         /// <returns>The object instance, or <c>null</c> if not found.</returns>
-        private async Task<T> QueryObjectAsync<T>([NotNull] string endpoint, [NotNull] XmlObjectSerializer serializer) where T : InfoBase
+        private async Task<T> QueryObjectAsync<T>([NotNull] string endpoint, [NotNull] XmlObjectSerializer serializer)
+            where T : InfoBase
         {
             await AssertAuthorizationAsync();
             try
@@ -105,7 +106,7 @@ namespace Ruqqus
             var sort = Enum.GetName(typeof(GuildSort), sorting)?.ToLowerInvariant() ?? "subs";
             PageResults<Guild> results;
             var page = 0;
-            
+
             do
             {
                 await AssertAuthorizationAsync();
@@ -116,10 +117,9 @@ namespace Ruqqus
 
                 if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
-                
+
                 foreach (var guild in results)
                     yield return guild;
-                
             } while (results.IsFullPage);
         }
 
@@ -134,15 +134,16 @@ namespace Ruqqus
         ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
         ///     expected behavior.
         /// </remarks>
-        public async IAsyncEnumerable<Post> GetGuildPosts([NotNull] Guild guild, PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
+        public async IAsyncEnumerable<Post> GetGuildPosts([NotNull] Guild guild, PostFilter filter = PostFilter.All,
+            PostSort sort = PostSort.New)
         {
             if (guild is null)
                 throw new ArgumentNullException(nameof(guild));
-            
+
             await foreach (var post in GetPosts($"/api/v1/guild/{guild.Name}/listing", filter, sort))
                 yield return post;
         }
-        
+
         /// <summary>
         /// Returns an enumerator for asynchronously iterating over posts with a <see cref="Guild"/>.
         /// </summary>
@@ -154,13 +155,14 @@ namespace Ruqqus
         ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
         ///     expected behavior.
         /// </remarks>
-        public async IAsyncEnumerable<Post> GetGuildPosts([NotNull] string guildName, PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
+        public async IAsyncEnumerable<Post> GetGuildPosts([NotNull] string guildName,
+            PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
         {
             if (string.IsNullOrEmpty(guildName))
                 throw new ArgumentNullException(nameof(guildName));
             if (!ValidGuildName.IsMatch(guildName))
                 throw new FormatException($"Invalid guild name \"{guildName}\".");
-            
+
             await foreach (var post in GetPosts($"/api/v1/guild/{guildName}/listing", filter, sort))
                 yield return post;
         }
@@ -182,7 +184,7 @@ namespace Ruqqus
             await foreach (var post in GetPosts($"/api/v1/user/{user.Username}/listing", PostFilter.All, PostSort.New))
                 yield return post;
         }
-        
+
         /// <summary>
         /// Returns an enumerator for asynchronously iterating over posts the specified <see cref="User"/>.
         /// </summary>
@@ -213,7 +215,8 @@ namespace Ruqqus
         ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
         ///     expected behavior.
         /// </remarks>
-        public async IAsyncEnumerable<Post> GetAllPosts(PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
+        public async IAsyncEnumerable<Post> GetAllPosts(PostFilter filter = PostFilter.All,
+            PostSort sort = PostSort.New)
         {
             await foreach (var post in GetPosts("/all/listing", filter, sort))
                 yield return post;
@@ -238,14 +241,13 @@ namespace Ruqqus
                 var response = await httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)
                     break;
-                
+
                 results = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
                 if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
-                
+
                 foreach (var post in results)
                     yield return post;
-
             } while (results.IsFullPage);
         }
 
@@ -261,7 +263,7 @@ namespace Ruqqus
             await foreach (var comment in GetComments(guild.Name))
                 yield return comment;
         }
-        
+
         /// <summary>
         /// Returns an enumerator for asynchronously iterating over comments of the specified <see cref="Guild"/>.
         /// </summary>
@@ -277,11 +279,11 @@ namespace Ruqqus
                 var response = await httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)
                     break;
-                
+
                 results = JsonHelper.Load<PageResults<Comment>>(await response.Content.ReadAsStreamAsync());
                 if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
-                
+
                 foreach (var post in results)
                     yield return post;
             } while (results.IsFullPage);
@@ -300,14 +302,14 @@ namespace Ruqqus
         {
             if (post is null)
                 throw new ArgumentNullException(nameof(post));
-            
+
             await foreach (var comment in GetComments(post.GuildName))
             {
                 if (comment.PostId == post.Id)
                     yield return comment;
             }
         }
-        
+
         /// <summary>
         /// Returns an enumerator for asynchronously iterating over comments of the specified <see cref="Post"/>.
         /// </summary>
@@ -325,7 +327,7 @@ namespace Ruqqus
             await foreach (var comment in GetPostComments(post))
                 yield return comment;
         }
-        
+
         /// <summary>
         /// Returns an enumerator for asynchronously iterating over posts the specified base <paramref name="url"/>.
         /// </summary>
@@ -339,7 +341,7 @@ namespace Ruqqus
             var f = Enum.GetName(typeof(PostFilter), filter)?.ToLowerInvariant() ?? "new";
             PageResults<Post> results;
             var page = 0;
-            
+
             do
             {
                 await AssertAuthorizationAsync();
@@ -347,14 +349,13 @@ namespace Ruqqus
                 var response = await httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)
                     break;
-                
+
                 results = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
                 if (!string.IsNullOrEmpty(results.ErrorMessage))
                     break;
-                
+
                 foreach (var post in results)
                     yield return post;
-                
             } while (results.IsFullPage);
         }
     }

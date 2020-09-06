@@ -15,7 +15,7 @@ namespace Ruqqus
         /// Gets the <see cref="Client"/> who refreshed the token.
         /// </summary>
         public Client Client { get; }
-        
+
         /// <summary>
         /// Gets the token that was refreshed.
         /// </summary>

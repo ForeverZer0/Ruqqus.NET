@@ -18,7 +18,7 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "name", IsRequired = false)]
         public string Name { get; }
-        
+
         /// <summary>
         /// Gets the description of this badge.
         /// </summary>
@@ -29,7 +29,7 @@ namespace Ruqqus
         /// Gets a relative URL for that is associated with this object, or <c>null</c> if not defined.
         /// </summary>
         public Uri Uri => url is null ? null : new Uri(url, UriKind.Relative);
-        
+
         /// <summary>
         /// Gets the time this badge was created.
         /// </summary>
@@ -72,11 +72,11 @@ namespace Ruqqus
         /// <param name="right">The second object to compare.</param>
         /// <returns><c>true</c> if objects are not equal, otherwise <c>false</c>.</returns>
         public static bool operator !=(Badge left, Badge right) => !Equals(left, right);
-        
+
         [DataMember(Name = "url", IsRequired = false)]
         private string url;
 
         [DataMember(Name = "created_utc", IsRequired = false, EmitDefaultValue = true)]
-        private int? utc ;
+        private int? utc;
     }
 }

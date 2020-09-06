@@ -18,7 +18,7 @@ namespace Ruqqus
                 throw new ArgumentNullException(nameof(comment));
             return await SubmitVote("/api/v1/vote/comment", comment.Id, direction);
         }
-     
+
         /// <summary>
         /// Submits a vote on a <see cref="Comment"/>.
         /// </summary>
@@ -31,7 +31,7 @@ namespace Ruqqus
                 throw new ArgumentNullException(nameof(commentId));
             return await SubmitVote("/api/v1/vote/comment", commentId, direction);
         }
-        
+
         /// <summary>
         /// Submits a vote on a <see cref="Post"/>.
         /// </summary>
@@ -44,7 +44,7 @@ namespace Ruqqus
                 throw new ArgumentNullException(nameof(post));
             return await SubmitVote("/api/v1/vote/post", post.Id, direction);
         }
-     
+
         /// <summary>
         /// Submits a vote on a <see cref="Post"/>.
         /// </summary>
@@ -57,7 +57,7 @@ namespace Ruqqus
                 throw new ArgumentNullException(nameof(postId));
             return await SubmitVote("/api/v1/vote/post", postId, direction);
         }
-        
+
         /// <summary>
         /// Places a vote on a submission.
         /// </summary>
@@ -71,7 +71,7 @@ namespace Ruqqus
                 throw new ArgumentNullException(nameof(id));
             if (!ValidSubmission.IsMatch(id))
                 throw new FormatException($"Invalid submission ID \"{id}\".");
-            
+
             await AssertAuthorizationAsync();
             var uri = new Uri($"{url}/{id}/{(int) direction}", UriKind.Relative);
             try

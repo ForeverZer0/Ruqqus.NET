@@ -14,7 +14,7 @@ namespace Ruqqus.Security
         /// The threshold (in seconds) of remaining time for the access token before it will refresh.
         /// </summary>
         public const long RefreshMargin = 15L;
-        
+
         /// <summary>
         /// Gets or sets the token used to refresh stale access tokens for persistent access.
         /// </summary>
@@ -60,7 +60,7 @@ namespace Ruqqus.Security
                 return diff < 0 ? 0 : diff;
             }
         }
-        
+
         /// <summary>
         /// Gets the scope of the features the application has been authorized to perform.
         /// </summary>
@@ -76,6 +76,7 @@ namespace Ruqqus.Security
                             scope |= value;
                     }
                 }
+
                 return scope;
             }
         }
@@ -90,10 +91,10 @@ namespace Ruqqus.Security
             AccessToken = token.AccessToken;
             expiresUtc = token.expiresUtc;
         }
-        
+
         [DataMember(Name = "scopes", IsRequired = false, EmitDefaultValue = false)]
         private string scopeList;
-        
+
         [DataMember(Name = "expires_at", IsRequired = true)]
         private long expiresUtc;
 

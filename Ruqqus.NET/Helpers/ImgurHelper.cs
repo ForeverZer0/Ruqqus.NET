@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 
 namespace Ruqqus.Helpers
 {
+    /// <summary>
+    /// Helper class for interacting with the Imgur API to upload images.
+    /// </summary>
     public static class ImgurHelper
     {
         /// <summary>
-        /// Helper method to upload an image to Imgur and returns the direct image link to the file, which is suitable
-        /// for image posts on Ruqqus. 
+        /// Uploads an image to Imgur and returns the direct image link to the file.
         /// </summary>
         /// <param name="imagePath">The path to an image file.</param>
         /// <param name="clientId">An application client ID issued by Imgur.</param>
@@ -21,7 +23,7 @@ namespace Ruqqus.Helpers
         {
             if (!File.Exists(imagePath ?? throw new ArgumentNullException(nameof(imagePath))))
                 throw new FileNotFoundException($"Cannot locate file \"{imagePath}\"", imagePath);
-            
+
             if (string.IsNullOrWhiteSpace(clientId))
                 throw new ArgumentNullException(nameof(clientId));
 
@@ -33,8 +35,7 @@ namespace Ruqqus.Helpers
             await using var stream = File.OpenRead(imagePath);
             var content = new MultipartFormDataContent
             {
-                { new StringContent("file"), "type" },
-                { new StreamContent(stream), "image", imagePath }
+                { new StringContent("file"), "type" }, { new StreamContent(stream), "image", imagePath }
             };
 
             var uri = new Uri("https://api.imgur.com/3/upload", UriKind.Absolute);
@@ -44,22 +45,19 @@ namespace Ruqqus.Helpers
             var result = JsonHelper.Load<ImgurResult>(await response.Content.ReadAsStreamAsync());
             return result.Success ? result.Data.Link : null;
         }
-        
+
         [DataContract]
         class ImgurData
         {
-            [DataMember(Name = "link")]
-            public string Link;
+            [DataMember(Name = "link")] public string Link;
         }
-        
+
         [DataContract, KnownType(typeof(ImgurData))]
         class ImgurResult
         {
-            [DataMember(Name = "success")]
-            public bool Success;
+            [DataMember(Name = "success")] public bool Success;
 
-            [DataMember(Name = "data")]
-            public ImgurData Data;
+            [DataMember(Name = "data")] public ImgurData Data;
         }
     }
 }

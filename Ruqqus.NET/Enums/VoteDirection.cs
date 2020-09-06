@@ -9,12 +9,12 @@ namespace Ruqqus
         /// Downvote a submission, as everyone on Ruqqus loves to do.
         /// </summary>
         Down = -1,
-            
+
         /// <summary>
         /// Set a vote to no vote.
         /// </summary>
         None = 0,
-            
+
         /// <summary>
         /// Upvote a submission.
         /// </summary>

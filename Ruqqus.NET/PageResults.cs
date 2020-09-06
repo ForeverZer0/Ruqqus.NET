@@ -9,19 +9,19 @@ namespace Ruqqus
     /// </summary>
     /// <typeparam name="T">A type derived from <see cref="InfoBase"/> that is contained on the pages.</typeparam>
     [DataContract, KnownType(typeof(Guild)), KnownType(typeof(Post)), KnownType(typeof(Comment))]
-    internal class PageResults<T> : IEnumerable<T> where T :InfoBase
+    internal class PageResults<T> : IEnumerable<T> where T : InfoBase
     {
         /// <summary>
         /// The number of results per page when enumerating over large collections.
         /// </summary>
         public const int ResultsPerPage = 25;
-        
+
         /// <summary>
         /// Gets a message indicating if there was an error. 
         /// </summary>
         [DataMember(Name = "error")]
         public string ErrorMessage { get; set; }
-        
+
         /// <summary>
         /// Gets the collection of data on this page.
         /// </summary>
