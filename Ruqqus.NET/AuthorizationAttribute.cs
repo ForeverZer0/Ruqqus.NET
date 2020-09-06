@@ -2,7 +2,6 @@ using System;
 
 namespace Ruqqus.NET
 {
-
     /// <summary>
     /// Metadata attribute to indicate the the permission and scope required to perform an action. 
     /// </summary>
@@ -10,17 +9,17 @@ namespace Ruqqus.NET
     public class AuthorizationAttribute : Attribute
     {
         /// <summary>
-        /// Gets a flag indicating the authority level the API requires for this functionality.
+        /// A flag indicating the authority level the API requires for this functionality.
         /// </summary>
-        public AuthorityKind Kind { get; }
-        
+        public readonly AuthorityKind Kind;
+
         /// <summary>
         /// Gets a flag indicating the required access level of the application for this functionality.
         /// </summary>
-        public OAuthScope Scope { get; }
+        public readonly OAuthScope Scope;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="AuthorizationAttribute"/> class.
+        /// A new instance of the <see cref="AuthorizationAttribute"/> class.
         /// </summary>
         /// <param name="kind">A flag indicating the authority level the API requires for this functionality.</param>
         /// <param name="scope">A flag indicating the required access level of the application for this functionality.</param>
