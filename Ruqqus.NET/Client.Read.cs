@@ -116,10 +116,127 @@ namespace Ruqqus.NET
                 if (!string.IsNullOrEmpty(guilds.ErrorMessage))
                     break;
                 
-                foreach (var guild in guilds.Items)
+                foreach (var guild in guilds)
                     yield return guild;
                 
             } while (guilds.Items.Count >= ResultsPerPage);
+        }
+
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over posts with a <see cref="Guild"/>.
+        /// </summary>
+        /// <param name="guild">The guild instance whose posts will be retrieved.</param>
+        /// <param name="filter">Determines the filter used for which results are returned.</param>
+        /// <param name="sort">Determines the order in which results are returned.</param>
+        /// <returns>A collection of <see cref="Post"/> instances.</returns>
+        /// <remarks>
+        ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
+        ///     expected behavior.
+        /// </remarks>
+        public async IAsyncEnumerable<Post> GetGuildPosts([NotNull] Guild guild, PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
+        {
+            if (guild is null)
+                throw new ArgumentNullException(nameof(guild));
+            
+            await foreach (var post in GetPosts($"/api/v1/guild/{guild.Name}/listing", filter, sort))
+                yield return post;
+        }
+        
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over posts with a <see cref="Guild"/>.
+        /// </summary>
+        /// <param name="guildName">The name of the guild whose posts will be retrieved.</param>
+        /// <param name="filter">Determines the filter used for which results are returned.</param>
+        /// <param name="sort">Determines the order in which results are returned.</param>
+        /// <returns>A collection of <see cref="Post"/> instances.</returns>
+        /// <remarks>
+        ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
+        ///     expected behavior.
+        /// </remarks>
+        public async IAsyncEnumerable<Post> GetGuildPosts([NotNull] string guildName, PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
+        {
+            if (string.IsNullOrEmpty(guildName))
+                throw new ArgumentNullException(nameof(guildName));
+            if (!ValidGuildName.IsMatch(guildName))
+                throw new FormatException($"Invalid guild name \"{guildName}\".");
+            
+            await foreach (var post in GetPosts($"/api/v1/guild/{guildName}/listing", filter, sort))
+                yield return post;
+        }
+
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over posts the specified <see cref="User"/>.
+        /// </summary>
+        /// <param name="user">The user whose posts will be retrieved.</param>
+        /// <returns>A collection of <see cref="Post"/> instances.</returns>
+        /// <remarks>
+        ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
+        ///     expected behavior.
+        /// </remarks>
+        public async IAsyncEnumerable<Post> GetUserPosts([NotNull] User user)
+        {
+            if (user is null)
+                throw new ArgumentNullException(nameof(user));
+
+            await foreach (var post in GetPosts($"/api/v1/user/{user.Username}/listing", PostFilter.All, PostSort.New))
+                yield return post;
+        }
+        
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over posts the specified <see cref="User"/>.
+        /// </summary>
+        /// <param name="username">The name of the user whose posts will be retrieved.</param>
+        /// <returns>A collection of <see cref="Post"/> instances.</returns>
+        /// <remarks>
+        ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
+        ///     expected behavior.
+        /// </remarks>
+        public async IAsyncEnumerable<Post> GetUserPosts([NotNull] string username)
+        {
+            if (string.IsNullOrEmpty(username))
+                throw new ArgumentNullException(nameof(username));
+            if (!ValidUsername.IsMatch(username))
+                throw new FormatException($"Invalid username \"{username}\".");
+
+            await foreach (var post in GetPosts($"/api/v1/user/{username}/listing", PostFilter.All, PostSort.New))
+                yield return post;
+        }
+
+        
+        // public async IAsyncEnumerable<Post> GetAllPosts(PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
+        // {
+        //     
+        // }
+
+        /// <summary>
+        /// Returns an enumerator for asynchronously iterating over posts the specified base <paramref name="url"/>.
+        /// </summary>
+        /// <param name="url">The base URL of a GET endpoint that retrieves post results.</param>
+        /// <param name="filter">Determines the filter used for which results are returned.</param>
+        /// <param name="sort">Determines the order in which results are returned.</param>
+        /// <returns>A collection of <see cref="Post"/> instances.</returns>
+        private async IAsyncEnumerable<Post> GetPosts(string url, PostFilter filter, PostSort sort)
+        {
+            var s = Enum.GetName(typeof(PostSort), sort)?.ToLowerInvariant() ?? "all";
+            var f = Enum.GetName(typeof(PostFilter), filter)?.ToLowerInvariant() ?? "new";
+            PageResults<Post> posts;
+            var page = 0;
+            
+            do
+            {
+                await AssertAuthorizationAsync();
+                var uri = new Uri($"{url}?sort={s}&filter={f}&page={++page}", UriKind.Relative);
+                var response = await httpClient.GetAsync(uri);
+                response.EnsureSuccessStatusCode();
+                posts = JsonHelper.Load<PageResults<Post>>(await response.Content.ReadAsStreamAsync());
+
+                if (!string.IsNullOrEmpty(posts.ErrorMessage))
+                    break;
+                
+                foreach (var guild in posts)
+                    yield return guild;
+                
+            } while (posts.Items.Count >= 25);
         }
     }
 }

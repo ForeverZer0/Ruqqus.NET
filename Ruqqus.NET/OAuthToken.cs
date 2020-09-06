@@ -12,6 +12,11 @@ namespace Ruqqus.NET
     public class OAuthToken
     {
         /// <summary>
+        /// The threshold (in seconds) of remaining time for the access token before it will refresh.
+        /// </summary>
+        public const long RefreshMargin = 15L;
+        
+        /// <summary>
         /// Gets or sets the token used to refresh stale access tokens for persistent access.
         /// </summary>
         [DataMember(Name = "refresh_token", IsRequired = false, EmitDefaultValue = false), CanBeNull]
@@ -42,7 +47,20 @@ namespace Ruqqus.NET
         /// <summary>
         /// Gets a value indicating if the access token has expired.
         /// </summary>
-        public bool IsExpired => DateTime.Now.ToUniversalTime() >= ExpirationTime;
+        public bool IsExpired => DateTime.UtcNow >= ExpirationTime;
+
+        /// <summary>
+        /// Gets the number of seconds remaining until the access token is invalid and will need refreshed.
+        /// </summary>
+        public long RemainingSeconds
+        {
+            get
+            {
+                var sinceEpoch = (long) (DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds;
+                var diff = expiresUtc - sinceEpoch;
+                return diff < 0 ? 0 : diff;
+            }
+        }
         
         /// <summary>
         /// Gets the scope of the features the application has been authorized to perform.

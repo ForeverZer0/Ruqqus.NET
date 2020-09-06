@@ -156,7 +156,7 @@ namespace Ruqqus.NET
         [Authorization(AuthorityKind.None)]
         public async Task<bool> RefreshTokenAsync()
         {
-            if (Token?.RefreshToken is null || !Token.IsExpired)
+            if (Token?.RefreshToken is null || Token.RemainingSeconds > OAuthToken.RefreshMargin)
                 return false;
 
             // Can't call PostForm here, would call a stack overflow
