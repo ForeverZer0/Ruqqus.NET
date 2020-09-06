@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Ruqqus.Types
+namespace Ruqqus
 {
     /// <summary>
     /// Represents an earned title that can be displayed with the username of an account.

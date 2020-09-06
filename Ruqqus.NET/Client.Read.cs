@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Ruqqus.Security;
-using Ruqqus.Types;
 
 namespace Ruqqus
 {

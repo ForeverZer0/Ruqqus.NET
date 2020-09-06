@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 // ReSharper disable UnassignedGetOnlyAutoProperty
 // ReSharper disable UnusedMember.Global
 
-namespace Ruqqus.Types
+namespace Ruqqus
 {
     /// <summary>
     /// Represents a Ruqqus.NET guild, which a board where posts can be posted.

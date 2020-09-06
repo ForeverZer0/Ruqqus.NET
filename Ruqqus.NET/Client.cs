@@ -10,7 +10,6 @@ using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ruqqus.Security;
-using Ruqqus.Types;
 
 namespace Ruqqus
 {

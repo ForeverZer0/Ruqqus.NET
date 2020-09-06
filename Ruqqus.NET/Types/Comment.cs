@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Ruqqus.Types
+namespace Ruqqus
 {
     /// <summary>
     /// Represents a single comment to a post or another comment.

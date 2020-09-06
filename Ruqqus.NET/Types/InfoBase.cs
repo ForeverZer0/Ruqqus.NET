@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Ruqqus.Types
+namespace Ruqqus
 {
     /// <summary>
     /// Abstract base class for all major API entities.
