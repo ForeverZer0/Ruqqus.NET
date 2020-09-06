@@ -10,8 +10,8 @@ namespace Ruqqus.NET
     /// <summary>
     /// Abstract base class for <see cref="Post"/> and <see cref="Comment"/> types which defined common functionality.
     /// </summary>
-    [DataContract][KnownType(typeof(ItemBase))]
-    public abstract class Submission : ItemBase
+    [DataContract][KnownType(typeof(InfoBase))]
+    public abstract class Submission : InfoBase
     {
         /// <summary>
         /// Gets the name of the submission's author, or <c>null</c> if it has been deleted/banned.
@@ -88,13 +88,7 @@ namespace Ruqqus.NET
         /// </summary>
         [field: DataMember(Name = "is_offensive")]
         public bool IsOffensive { get; }
-        
-        /// <summary>
-        /// Gets the text title of this submission.
-        /// </summary>
-        [field: DataMember(Name = "title")]
-        public string Title { get; }
-        
+
         /// <summary>
         /// Gets the name of the guild this submission is contained within.
         /// </summary>

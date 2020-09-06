@@ -17,8 +17,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="LICENSE.txt" Pack="true" PackagePath="$(PackageLicenseFile)"/>
-        <None Include="icon.png" Pack="true" PackagePath="/"/>
+        <None Include="LICENSE.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
+        <None Include="icon.png" Pack="true" PackagePath="/" />
     </ItemGroup>
     
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

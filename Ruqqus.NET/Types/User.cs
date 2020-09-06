@@ -11,8 +11,8 @@ namespace Ruqqus.NET
     /// <summary>
     /// Represents a Ruqqus.NET user account.
     /// </summary>
-    [DataContract] [KnownType(typeof(ItemBase)), KnownType(typeof(Badge)), KnownType(typeof(Title))]
-    public class User : ItemBase
+    [DataContract] [KnownType(typeof(InfoBase)), KnownType(typeof(Badge)), KnownType(typeof(Title))]
+    public class User : InfoBase
     {
         /// <summary>
         /// Gets the username associated with this account.

@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruqqus.NET", "Ruqqus.NET\Ruqqus.NET.csproj", "{C306A7D8-B210-4DC0-ABE3-E4B3B0D8D1AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ruqqus.NET.VoteBot", "Ruqqus.NET.VoteBot\Ruqqus.NET.VoteBot.csproj", "{7E51B1A6-5310-45E8-93EB-47F10D2F3139}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{C306A7D8-B210-4DC0-ABE3-E4B3B0D8D1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C306A7D8-B210-4DC0-ABE3-E4B3B0D8D1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C306A7D8-B210-4DC0-ABE3-E4B3B0D8D1AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E51B1A6-5310-45E8-93EB-47F10D2F3139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E51B1A6-5310-45E8-93EB-47F10D2F3139}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E51B1A6-5310-45E8-93EB-47F10D2F3139}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E51B1A6-5310-45E8-93EB-47F10D2F3139}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

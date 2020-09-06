@@ -11,7 +11,7 @@ namespace Ruqqus.NET
     /// Abstract base class for all major API entities.
     /// </summary>
     [DataContract]
-    public abstract class ItemBase : IEquatable<ItemBase>
+    public abstract class InfoBase : IEquatable<InfoBase>
     {
         /// <summary>
         /// Gets a unique ID used for identifying this entity.
@@ -50,7 +50,7 @@ namespace Ruqqus.NET
         public Uri PermaLink => permalink is null ? null : new Uri(permalink, UriKind.Relative);
 
         /// <inheritdoc />
-        public bool Equals(ItemBase other)
+        public bool Equals(InfoBase other)
         {
             if (ReferenceEquals(null, other)) return false;
             return ReferenceEquals(this, other) || string.Equals(Id, other.Id, StringComparison.OrdinalIgnoreCase);
@@ -61,7 +61,7 @@ namespace Ruqqus.NET
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((ItemBase) obj);
+            return obj.GetType() == GetType() && Equals((InfoBase) obj);
         }
 
         /// <inheritdoc />
@@ -73,7 +73,7 @@ namespace Ruqqus.NET
         /// <param name="left">The first object to compare.</param>
         /// <param name="right">The second object to compare.</param>
         /// <returns><c>true</c> if objects are equal, otherwise <c>false</c>.</returns>
-        public static bool operator ==(ItemBase left, ItemBase right) => Equals(left, right);
+        public static bool operator ==(InfoBase left, InfoBase right) => Equals(left, right);
 
         /// <summary>
         /// Gets a value indicating if this object is not equal to another.
@@ -81,7 +81,7 @@ namespace Ruqqus.NET
         /// <param name="left">The first object to compare.</param>
         /// <param name="right">The second object to compare.</param>
         /// <returns><c>true</c> if objects are not equal, otherwise <c>false</c>.</returns>
-        public static bool operator !=(ItemBase left, ItemBase right) => !Equals(left, right);
+        public static bool operator !=(InfoBase left, InfoBase right) => !Equals(left, right);
 
         [DataMember(Name = "created_utc", IsRequired = false, EmitDefaultValue = true)]
         private long utc ;

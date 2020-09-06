@@ -49,6 +49,12 @@ namespace Ruqqus.NET
         public string Domain { get; }
 
         /// <summary>
+        /// Gets the text title of this post.
+        /// </summary>
+        [field: DataMember(Name = "title")]
+        public string Title { get; }
+        
+        /// <summary>
         /// Gets the embed link for this post.
         /// </summary>
         public Uri EmbedUrl => string.IsNullOrEmpty(embedUrl) ? null : new Uri(embedUrl, UriKind.RelativeOrAbsolute);
