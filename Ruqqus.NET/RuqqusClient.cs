@@ -57,6 +57,47 @@ namespace Ruqqus.NET
         private static readonly DataContractJsonSerializer GuildSerializer;
         private static readonly DataContractJsonSerializer CommentSerializer;
         private static readonly DataContractJsonSerializer PostSerializer;
+
+        /// <summary>
+        /// Checks if the specified username is both valid and available.
+        /// </summary>
+        /// <param name="username">A username to query.</param>
+        /// <returns><c>true</c> if the username is both valid and available, otherwise <c>false</c>.</returns>
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        public static async Task<bool> IsUsernameAvailable([CanBeNull] string username)
+        {
+            return await IsAvailable("https://ruqqus.com/api/is_available/", ValidUsername, username);
+        }
+        
+        /// <summary>
+        /// Checks if the specified guild name is both valid and available.
+        /// </summary>
+        /// <param name="guildName">A username to query.</param>
+        /// <returns><c>true</c> if the guild name is both valid and available, otherwise <c>false</c>.</returns>
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        public static async Task<bool> IsGuildNameAvailable([CanBeNull] string guildName)
+        {
+            return await IsAvailable("https://ruqqus.com/api/board_available/", ValidGuildName, guildName);
+        }
+
+        private static async Task<bool> IsAvailable(string route, Regex validator, string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return false;
+            if (!validator.IsMatch(name))
+                return false;
+            
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+            var uri = new Uri($"{route}{name}", UriKind.Absolute);
+            var response = await client.GetAsync(uri);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            return Regex.IsMatch(result, @":true\b");
+
+        }
+        
         
         /// <summary>
         /// Validates an input string and returns value indicating if it is a valid username.

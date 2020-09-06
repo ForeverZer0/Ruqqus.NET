@@ -9,7 +9,7 @@ namespace Ruqqus.NET
     public enum OAuthScope
     {
         /// <summary>
-        /// No access. This is an invalid value.
+        /// No scope defined.
         /// </summary>
         None = 0x00,
         
