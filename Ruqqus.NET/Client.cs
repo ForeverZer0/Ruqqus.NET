@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Json;
 using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Ruqqus.Helpers;
 using Ruqqus.Security;
 
 namespace Ruqqus

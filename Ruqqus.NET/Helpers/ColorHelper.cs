@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
 
-namespace Ruqqus
+namespace Ruqqus.Helpers
 {
     /// <summary>
     /// Helper class for converting colors, as the System.Drawing.ColorTranslator is not present in netstandard.

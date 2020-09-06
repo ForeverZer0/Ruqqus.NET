@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Runtime.Serialization;
+using Ruqqus.Helpers;
 
 // ReSharper disable UnassignedGetOnlyAutoProperty
 // ReSharper disable UnusedMember.Global

@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
-namespace Ruqqus
+namespace Ruqqus.Helpers
 {
     public static class ImgurHelper
     {
