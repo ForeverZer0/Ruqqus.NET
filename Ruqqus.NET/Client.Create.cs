@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Ruqqus.Helpers;
@@ -208,7 +209,7 @@ namespace Ruqqus
         private async Task<Post> CreatePost([NotNull] string guildName, string title, string text, string url,
             string imagePath)
         {
-            await AssertAuthorizationAsync();
+            await RefreshTokenAsync();
 
             if (string.IsNullOrEmpty(guildName))
                 throw new ArgumentNullException(nameof(guildName));

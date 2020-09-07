@@ -77,7 +77,7 @@ namespace Ruqqus
         private async Task<T> QueryObjectAsync<T>([NotNull] string endpoint, [NotNull] XmlObjectSerializer serializer)
             where T : InfoBase
         {
-            await AssertAuthorizationAsync();
+            await RefreshTokenAsync();
             try
             {
                 var uri = new Uri(endpoint, UriKind.Relative);
@@ -109,7 +109,7 @@ namespace Ruqqus
 
             do
             {
-                await AssertAuthorizationAsync();
+                await RefreshTokenAsync();
                 var uri = new Uri($"/api/v1/guilds?sort={sort}&page={++page}", UriKind.Relative);
                 var response = await httpClient.GetAsync(uri);
                 response.EnsureSuccessStatusCode();
@@ -215,10 +215,9 @@ namespace Ruqqus
         ///     A new query must be performed after every 25 results returned, so brief pauses at these intervals is an
         ///     expected behavior.
         /// </remarks>
-        public async IAsyncEnumerable<Post> GetAllPosts(PostFilter filter = PostFilter.All,
-            PostSort sort = PostSort.New)
+        public async IAsyncEnumerable<Post> GetAllPosts(PostFilter filter = PostFilter.All, PostSort sort = PostSort.New)
         {
-            await foreach (var post in GetPosts("/all/listing", filter, sort))
+            await foreach (var post in GetPosts("/api/v1/all/listing", filter, sort))
                 yield return post;
         }
 
@@ -236,7 +235,7 @@ namespace Ruqqus
             var page = 0;
             do
             {
-                await AssertAuthorizationAsync();
+                await RefreshTokenAsync();
                 var uri = new Uri($"/api/v1/front/listing?{++page}", UriKind.Relative);
                 var response = await httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)
@@ -344,7 +343,7 @@ namespace Ruqqus
 
             do
             {
-                await AssertAuthorizationAsync();
+                await RefreshTokenAsync();
                 var uri = new Uri($"{url}?sort={s}&filter={f}&page={++page}", UriKind.Relative);
                 var response = await httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)

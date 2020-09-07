@@ -32,7 +32,7 @@ namespace Ruqqus
             if (!ValidSubmission.IsMatch(commentId))
                 throw new FormatException($"Invalid comment ID \"{commentId}\".");
 
-            await AssertAuthorizationAsync();
+            await RefreshTokenAsync();
             var uri = new Uri($"/api/v1/delete/comment/{commentId}", UriKind.Relative);
             var response = await httpClient.PostAsync(uri, null);
             return response.IsSuccessStatusCode;

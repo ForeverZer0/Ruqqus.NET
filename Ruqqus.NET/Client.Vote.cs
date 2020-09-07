@@ -73,7 +73,7 @@ namespace Ruqqus
             if (!ValidSubmission.IsMatch(id))
                 throw new FormatException($"Invalid submission ID \"{id}\".");
 
-            await AssertAuthorizationAsync();
+            await RefreshTokenAsync();
             var uri = new Uri($"{url}/{id}/{(int) direction}", UriKind.Relative);
             try
             {

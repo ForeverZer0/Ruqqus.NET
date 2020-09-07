@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.Serialization.Json;
-using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ruqqus.Helpers;
@@ -19,7 +17,6 @@ namespace Ruqqus
     /// <summary>
     /// A client for interacting and perfomring operations with the Ruqqus API.
     /// </summary>
-    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public partial class Client : IDisposable
     {
         /// <summary>
@@ -76,7 +73,8 @@ namespace Ruqqus
         {
             return await IsAvailable("https://ruqqus.com/api/board_available/", ValidGuildName, guildName);
         }
-
+        
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
         private static async Task<bool> IsAvailable(string route, Regex validator, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -90,7 +88,7 @@ namespace Ruqqus
             var response = await client.GetAsync(uri);
 
             var result = await response.Content.ReadAsStringAsync();
-
+            // Just cheating this, not going to parse the JSON
             return Regex.IsMatch(result, @":true\b");
         }
 
@@ -99,6 +97,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="username">The username to check.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
         public static bool IsValidUsername([CanBeNull] string username) =>
             username != null && ValidUsername.IsMatch(username);
 
@@ -107,6 +106,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="guildName">The name of the guild.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
         public static bool IsValidGuildName([CanBeNull] string guildName) =>
             guildName != null && ValidGuildName.IsMatch(guildName);
 
@@ -115,17 +115,18 @@ namespace Ruqqus
         /// </summary>
         /// <param name="id">The ID for a post or comment.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
         public static bool IsValidSubmissionId([CanBeNull] string id) => id != null && ValidSubmission.IsMatch(id);
 
         /// <summary>
-        /// Gets or sets the authorization token granting access to the client/
+        /// Gets or sets the authorization accessToken granting access to the client/
         /// </summary>
         public OAuthToken Token
         {
-            get => token;
+            get => accessToken;
             set
             {
-                token = value;
+                accessToken = value;
                 httpClient.DefaultRequestHeaders.Authorization = value is null
                     ? null
                     : new AuthenticationHeaderValue(value.Type, value.AccessToken);
@@ -138,7 +139,7 @@ namespace Ruqqus
         /// <param name="clientId">The client ID of the application requesting access.</param>
         /// <param name="clientSecret">The client secret of the application requesting access.</param>
         /// <exception cref="ArgumentNullException">Thrown when the ID/secret is null or empty.</exception>
-        public Client(string clientId, string clientSecret)
+        public Client([NotNull] string clientId, [NotNull] string clientSecret)
         {
             ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
             ClientSecret = clientSecret ?? throw new ArgumentNullException(nameof(clientSecret));
@@ -153,10 +154,10 @@ namespace Ruqqus
         /// </summary>
         /// <param name="clientId">The client ID of the application requesting access.</param>
         /// <param name="clientSecret">The client secret of the application requesting access.</param>
-        /// <param name="token">A previously authorized access token.</param>
+        /// <param name="token">A previously authorized access accessToken.</param>
         /// <exception cref="ArgumentNullException">Thrown when the ID/secret is null or empty.</exception>
-        public Client([NotNull] string clientId, [NotNull] string clientSecret, [NotNull] OAuthToken token) : this(
-            clientId, clientSecret)
+        public Client([NotNull] string clientId, [NotNull] string clientSecret, [NotNull] OAuthToken token) : 
+            this(clientId, clientSecret)
         {
             Token = token ?? throw new ArgumentNullException(nameof(token));
         }
@@ -166,14 +167,14 @@ namespace Ruqqus
         /// when the user made approval.
         /// </summary>
         /// <param name="code">The authorization code from the redirect URL.</param>
-        /// <param name="persist">Flag indicating if this token will persist and be reused more than once.</param>
-        /// <returns>A newly created access token.</returns>
+        /// <param name="persist">Flag indicating if this accessToken will persist and be reused more than once.</param>
+        /// <returns>A newly created access accessToken.</returns>
         /// <remarks>This action can only be performed once per code, and will fail otherwise.</remarks>
-        [Authorization(AuthorityKind.None)]
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
         public async Task<OAuthToken> GrantTokenAsync([NotNull] string code, bool persist = true)
         {
             var uri = new Uri("/oauth/grant", UriKind.Relative);
-            return await PostForm<OAuthToken>(uri,
+            var token = await PostForm<OAuthToken>(uri,
                 new[]
                 {
                     new KeyValuePair<string, string>("grant_type", "code"),
@@ -182,13 +183,16 @@ namespace Ruqqus
                     new KeyValuePair<string, string>("code", code),
                     new KeyValuePair<string, string>("permanent", persist ? "persist" : "nope"),
                 });
+
+            OnTokenGranted(token);
+            return token;
         }
 
         /// <summary>
-        /// Refreshes a stale access token as needed. 
+        /// Refreshes a stale access accessToken as needed. 
         /// </summary>
-        /// <returns>A task indicating <c>true</c> if access token was refreshed, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.None)]
+        /// <returns>A task indicating <c>true</c> if access accessToken was refreshed, otherwise <c>false</c>.</returns>
+        [Authorization(AuthorityKind.None, OAuthScope.None)]
         public async Task<bool> RefreshTokenAsync()
         {
             if (Token?.RefreshToken is null || Token.RemainingSeconds > OAuthToken.RefreshMargin)
@@ -208,36 +212,24 @@ namespace Ruqqus
             response.EnsureSuccessStatusCode();
 
             var refreshToken = JsonHelper.Load<OAuthToken>(await response.Content.ReadAsStreamAsync());
-            token.Update(refreshToken);
-            OnTokenRefreshed();
+            accessToken.Update(refreshToken);
+            var header = new AuthenticationHeaderValue(accessToken.Type, accessToken.AccessToken);
+            httpClient.DefaultRequestHeaders.Authorization = header;
+            
+            OnTokenRefreshed(refreshToken);
             return true;
         }
-
-        private async Task AssertAuthorizationAsync(bool required = true)
-        {
-            if (token is null)
-            {
-                if (required)
-                    throw new AuthenticationException("Application authentication is required for this action.");
-                return;
-            }
-
-            await RefreshTokenAsync();
-        }
-
-        private readonly HttpClient httpClient;
+        
         protected readonly string ClientId;
         protected readonly string ClientSecret;
-        private OAuthToken token;
+        private readonly HttpClient httpClient;
+        private OAuthToken accessToken;
 
-        public void Dispose()
-        {
-            httpClient.Dispose();
-        }
+        public void Dispose() => httpClient.Dispose();
 
         private async Task<T> PostForm<T>(Uri uri, IEnumerable<KeyValuePair<string, string>> parameters)
         {
-            await AssertAuthorizationAsync();
+            await RefreshTokenAsync();
 
             var content = new FormUrlEncodedContent(parameters);
             var response = await httpClient.PostAsync(uri, content);

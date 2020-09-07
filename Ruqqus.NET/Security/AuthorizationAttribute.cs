@@ -21,9 +21,9 @@ namespace Ruqqus.Security
         /// <summary>
         /// A new instance of the <see cref="AuthorizationAttribute"/> class.
         /// </summary>
-        /// <param name="kind">A flag indicating the authority level the API requires for this functionality.</param>
-        /// <param name="scope">A flag indicating the required access level of the application for this functionality.</param>
-        public AuthorizationAttribute(AuthorityKind kind, OAuthScope scope = OAuthScope.None)
+        /// <param name="kind">A flag indicating the authority level (login) required by the application for this functionality.</param>
+        /// <param name="scope">A flag indicating the required scope (OAuth) required by the application for this functionality.</param>
+        public AuthorizationAttribute(AuthorityKind kind, OAuthScope scope)
         {
             Kind = kind;
             Scope = scope;
