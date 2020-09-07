@@ -11,8 +11,8 @@ namespace Ruqqus
     /// <summary>
     /// Represents a Ruqqus.NET guild, which a board where posts can be posted.
     /// </summary>
-    [DataContract, KnownType(typeof(InfoBase))]
-    public class Guild : InfoBase
+    [DataContract, KnownType(typeof(ItemBase))]
+    public class Guild : ItemBase
     {
         /// <summary>
         /// Gets the name of the guild.

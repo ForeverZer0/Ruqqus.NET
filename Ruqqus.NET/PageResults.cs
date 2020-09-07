@@ -7,9 +7,9 @@ namespace Ruqqus
     /// <summary>
     /// Represents a "page" of results, where each page contains <see cref="Client.ResultsPerPage"/> results.
     /// </summary>
-    /// <typeparam name="T">A type derived from <see cref="InfoBase"/> that is contained on the pages.</typeparam>
+    /// <typeparam name="T">A type derived from <see cref="ItemBase"/> that is contained on the pages.</typeparam>
     [DataContract, KnownType(typeof(Guild)), KnownType(typeof(Post)), KnownType(typeof(Comment))]
-    internal class PageResults<T> : IEnumerable<T> where T : InfoBase
+    internal class PageResults<T> : IEnumerable<T> where T : ItemBase
     {
         /// <summary>
         /// The number of results per page when enumerating over large collections.

@@ -11,8 +11,8 @@ namespace Ruqqus
     /// Abstract base class for <see cref="Post"/> and <see cref="Comment"/> types which defined common functionality.
     /// </summary>
     [DataContract]
-    [KnownType(typeof(InfoBase))]
-    public abstract class Submission : InfoBase
+    [KnownType(typeof(ItemBase))]
+    public abstract class Submission : ItemBase
     {
         /// <summary>
         /// Gets the name of the submission's author, or <c>null</c> if it has been deleted/banned.

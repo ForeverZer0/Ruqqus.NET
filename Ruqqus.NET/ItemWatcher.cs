@@ -41,7 +41,7 @@ namespace Ruqqus
     }
     
     
-    public class ItemEventArgs<T> : EventArgs where T : InfoBase
+    public class ItemEventArgs<T> : EventArgs where T : ItemBase
     {
         public T Item { get; }
 
@@ -51,7 +51,7 @@ namespace Ruqqus
         }
     }
     
-    public abstract class ItemWatcher<T> where T : InfoBase
+    public abstract class ItemWatcher<T> where T : ItemBase
     {
         /// <summary>
         /// Gets the number of seconds between the content watcher queries for new content.

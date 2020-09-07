@@ -72,10 +72,10 @@ namespace Ruqqus
         /// </summary>
         /// <param name="endpoint">The relative route where the GET method is invoked.</param>
         /// <param name="serializer">A JSON serializer for the given type.</param>
-        /// <typeparam name="T">A type that inherits from <see cref="InfoBase"/>.</typeparam>
+        /// <typeparam name="T">A type that inherits from <see cref="ItemBase"/>.</typeparam>
         /// <returns>The object instance, or <c>null</c> if not found.</returns>
         private async Task<T> QueryObjectAsync<T>([NotNull] string endpoint, [NotNull] XmlObjectSerializer serializer)
-            where T : InfoBase
+            where T : ItemBase
         {
             await RefreshTokenAsync();
             try

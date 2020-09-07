@@ -15,7 +15,7 @@ using Ruqqus.Security;
 namespace Ruqqus
 {
     /// <summary>
-    /// A client for interacting and perfomring operations with the Ruqqus API.
+    /// A client for interacting and performing operations with the Ruqqus API.
     /// </summary>
     public partial class Client : IDisposable
     {
