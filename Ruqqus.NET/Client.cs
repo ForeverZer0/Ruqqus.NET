@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using Ruqqus.Helpers;
 using Ruqqus.Security;
 
+[assembly: CLSCompliant(true)]
+
 namespace Ruqqus
 {
     /// <summary>

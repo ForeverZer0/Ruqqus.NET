@@ -228,31 +228,36 @@ namespace Ruqqus
 
             var uri = new Uri("/api/v1/submit", UriKind.Relative);
 
+            Post post;
             if (string.IsNullOrEmpty(imagePath))
             {
-                return await PostForm<Post>(uri,
-                    new[]
-                    {
-                        new KeyValuePair<string, string>("board", guildName),
-                        new KeyValuePair<string, string>("title", title),
-                        new KeyValuePair<string, string>("body", text ?? string.Empty),
-                        new KeyValuePair<string, string>("url", url ?? string.Empty)
-                    });
+                post = await PostForm<Post>(uri, new[]
+                {
+                    new KeyValuePair<string, string>("board", guildName),
+                    new KeyValuePair<string, string>("title", title),
+                    new KeyValuePair<string, string>("body", text ?? string.Empty),
+                    new KeyValuePair<string, string>("url", url ?? string.Empty)
+                });
+            }
+            else
+            {
+                await using var imageStream = File.OpenRead(imagePath);
+                var content = new MultipartFormDataContent
+                {
+                    { new StringContent(guildName), "board" },
+                    { new StringContent(title), "title" },
+                    { new StringContent(text ?? string.Empty), "body" },
+                    { new StringContent(url ?? string.Empty), "url" },
+                    { new StreamContent(imageStream), "file", imagePath }
+                };
+
+                var response = await httpClient.PostAsync(uri, content);
+                response.EnsureSuccessStatusCode();
+                post = JsonHelper.Load<Post>(await response.Content.ReadAsStreamAsync());
             }
 
-            await using var imageStream = File.OpenRead(imagePath);
-            var content = new MultipartFormDataContent
-            {
-                { new StringContent(guildName), "board" },
-                { new StringContent(title), "title" },
-                { new StringContent(text ?? string.Empty), "body" },
-                { new StringContent(url ?? string.Empty), "url" },
-                { new StreamContent(imageStream), "file", imagePath }
-            };
-
-            var response = await httpClient.PostAsync(uri, content);
-            response.EnsureSuccessStatusCode();
-            return JsonHelper.Load<Post>(await response.Content.ReadAsStreamAsync());
+            OnPostCreated(post);
+            return post;
         }
 
         /// <summary>
@@ -268,13 +273,15 @@ namespace Ruqqus
                 throw new ArgumentException("Comment text body cannot be null or empty.", nameof(text));
 
             var uri = new Uri("/api/v1/comment", UriKind.Relative);
-            return await PostForm<Comment>(uri,
-                new[]
-                {
-                    new KeyValuePair<string, string>("submission", postId),
-                    new KeyValuePair<string, string>("parent_fullname", parentFullname),
-                    new KeyValuePair<string, string>("body", text),
-                });
+            var comment = await PostForm<Comment>(uri, new[]
+            {
+                new KeyValuePair<string, string>("submission", postId),
+                new KeyValuePair<string, string>("parent_fullname", parentFullname),
+                new KeyValuePair<string, string>("body", text),
+            });
+
+            OnCommentCreated(comment);
+            return comment;
         }
     }
 }

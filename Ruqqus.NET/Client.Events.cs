@@ -14,47 +14,135 @@ namespace Ruqqus
         
         
     }
+
+    /// <summary>
+    /// Event handler for all <see cref="Ruqqus.Client"/> events.
+    /// </summary>
+    /// <param name="client">The <see cref="Client"/> instance raising the event.</param>
+    /// <param name="args">Arguments to be supplied with the event.</param>
+    /// <typeparam name="T">A type derived from <see cref="EventArgs"/>.</typeparam>
+    public delegate void ClientEventHandler<in T>(Client client, T args) where T : EventArgs;
+
+    /// <summary>
+    /// Base class for event arguments that pertain to posts and/or comments.
+    /// </summary>
+    public class SubmissionEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the unique ID of the submission being voted on, either a post or comment ID.
+        /// </summary>
+        [CanBeNull]
+        public string Id { get; }
+        
+        /// <summary>
+        /// Gets a value indicating if this vote was cast on a <see cref="Post"/>.
+        /// </summary>
+        public bool IsPost { get; }
+
+        /// <summary>
+        /// Gets a value indicating if this vote was cast on a <see cref="Comment"/>.
+        /// </summary>
+        public bool IsComment => !IsPost;
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="SubmissionEventArgs"/> class.
+        /// </summary>
+        /// <param name="id">The unique ID of the submission being voted on, either a post or comment ID.</param>
+        /// <param name="isPost">A value indicating if this vote was cast on a post or comment.></param>
+        public SubmissionEventArgs([CanBeNull] string id, bool isPost)
+        {
+            Id = id;
+            IsPost = isPost;
+        }
+    }
     
+    /// <summary>
+    /// Arguments supplied with vote submission events.
+    /// </summary>
+    /// <seealso cref="Client.VoteSubmitted"/>
+    public class VoteEventArgs : SubmissionEventArgs
+    {
+        /// <summary>
+        /// Gets the direction of the vote that was cast.
+        /// </summary>
+        public VoteDirection VoteDirection { get; }
 
-
+        /// <summary>
+        /// Creates a new instance of the <see cref="VoteEventArgs"/> class.
+        /// </summary>
+        /// <param name="id">The unique ID of the submission being voted on, either a post or comment ID.</param>
+        /// <param name="direction">The direction of the vote that was cast.</param>
+        /// <param name="isPost">A value indicating if this vote was cast on a post or comment.></param>
+        public VoteEventArgs([CanBeNull] string id, VoteDirection direction, bool isPost) : base(id, isPost)
+        {
+            VoteDirection = direction;
+        }
+    }
+    
+    /// <summary>
+    /// Arguments that pertain to <see cref="Post"/> events.
+    /// </summary>
+    public class PostEventArgs : SubmissionEventArgs
+    {
+        /// <summary>
+        /// Gets the post that raised the event.
+        /// </summary>
+        [CanBeNull]
+        public Post Post { get; }
+        
+        /// <summary>
+        /// Creates a new instance of the <see cref="PostEventArgs"/> class.
+        /// </summary>
+        /// <param name="post">The <see cref="Post"/> instance raising the event.</param>
+        public PostEventArgs([CanBeNull] Post post) : base(post?.Id, true)
+        {
+            Post = post;
+        }
+    }
+    
+    /// <summary>
+    /// Arguments that pertain to <see cref="Post"/> events.
+    /// </summary>
+    public class CommentEventArgs : SubmissionEventArgs
+    {
+        /// <summary>
+        /// Gets the post that raised the event.
+        /// </summary>
+        [CanBeNull]
+        public Comment Comment { get; }
+        
+        /// <summary>
+        /// Creates a new instance of the <see cref="PostEventArgs"/> class.
+        /// </summary>
+        /// <param name="comment">The <see cref="Comment"/> instance raising the event.</param>
+        public CommentEventArgs([CanBeNull] Comment comment) : base(comment?.Id, false)
+        {
+            Comment = comment;
+        }
+    }
     
     public partial class Client
     {
-        
-        public event EventHandler PostCreated;
-
-        public event EventHandler CommentCreated;
-
-        public event EventHandler VoteSubmitted;
-
-        public Uri GenerateAuthorizationUri(string redirect, OAuthScope scope, bool persist, out string csrf)
-        {
-
-            var scopeNames = (from OAuthScope value in Enum.GetValues(typeof(OAuthScope)) 
-                where value != OAuthScope.None && value != OAuthScope.All 
-                where scope.HasFlag(value) 
-                select Enum.GetName(typeof(OAuthScope), value)?.ToLowerInvariant()).ToList();
-
-            if (scopeNames.Count < 1)
-                throw new ArgumentException("Must set at least one scope.");
-            
-            csrf = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-            var buffer = new StringBuilder("https://ruqqus.com/oauth/authorize");
-            buffer.AppendFormat("?client_id={0}", ClientId);
-            buffer.AppendFormat("&redirect_url={0}", redirect);
-            buffer.AppendFormat("&scope={0}", string.Join(',', scopeNames));
-            buffer.AppendFormat("&state={0}", csrf);
-            if (persist)
-                buffer.Append("&permanent=persist");
-            
-            return new Uri(buffer.ToString(), UriKind.Absolute);
-        }
-        
         /// <summary>
         /// Occurs when the client's current access token is refreshed.
         /// </summary>
-        public event EventHandler<TokenRefreshedEventArgs> TokenRefreshed;
+        public event ClientEventHandler<TokenRefreshedEventArgs> TokenRefreshed;
         
+        /// <summary>
+        /// Occurs when a post or comment is voted on.
+        /// </summary>
+        public event ClientEventHandler<VoteEventArgs> VoteSubmitted;
+        
+        /// <summary>
+        /// Occurs when a post is created with the API.
+        /// </summary>
+        public event ClientEventHandler<PostEventArgs> PostCreated;
+
+        /// <summary>
+        /// Occurs when a comment is created with the API.
+        /// </summary>
+        public event ClientEventHandler<CommentEventArgs> CommentCreated;
+
         /// <summary>
         /// Updates the client's authorization header and invokes the <see cref="TokenRefreshed"/> event.
         /// </summary>
@@ -64,8 +152,34 @@ namespace Ruqqus
             httpClient.DefaultRequestHeaders.Authorization = header;
             TokenRefreshed?.Invoke(this, new TokenRefreshedEventArgs(this, Token));
         }
-        
-        
-        
+
+        /// <summary>
+        /// Invokes the <see cref="VoteSubmitted"/> event.
+        /// </summary>
+        /// <param name="id">The unique ID of the submission (post or comment)</param>
+        /// <param name="direction">The direction of the vote that was cast.</param>
+        /// <param name="isPost"><c>true</c> if <paramref name="id"/> refers to a post, otherwise <c>false</c> for a comment.</param>
+        protected virtual void OnVoteSubmitted([CanBeNull] string id, VoteDirection direction, bool isPost)
+        {
+            VoteSubmitted?.Invoke(this, new VoteEventArgs(id, direction, isPost));
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="PostCreated"/> event.
+        /// </summary>
+        /// <param name="post">A <see cref="Post"/> instance to supply as the argument.</param>
+        protected virtual void OnPostCreated([CanBeNull] Post post)
+        {
+            PostCreated?.Invoke(this, new PostEventArgs(post));
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="CommentCreated"/> event.
+        /// </summary>
+        /// <param name="comment">A <see cref="Comment"/> instance to supply as the argument.</param>
+        protected virtual void OnCommentCreated([CanBeNull] Comment comment)
+        {
+            CommentCreated?.Invoke(this, new CommentEventArgs(comment));
+        }
     }
 }

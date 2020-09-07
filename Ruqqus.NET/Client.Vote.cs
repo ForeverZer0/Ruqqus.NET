@@ -16,7 +16,7 @@ namespace Ruqqus
         {
             if (comment is null)
                 throw new ArgumentNullException(nameof(comment));
-            return await SubmitVote("/api/v1/vote/comment", comment.Id, direction);
+            return await SubmitVote("/api/v1/vote/comment", comment.Id, direction, false);
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace Ruqqus
         {
             if (string.IsNullOrEmpty(commentId))
                 throw new ArgumentNullException(nameof(commentId));
-            return await SubmitVote("/api/v1/vote/comment", commentId, direction);
+            return await SubmitVote("/api/v1/vote/comment", commentId, direction, false);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Ruqqus
         {
             if (post is null)
                 throw new ArgumentNullException(nameof(post));
-            return await SubmitVote("/api/v1/vote/post", post.Id, direction);
+            return await SubmitVote("/api/v1/vote/post", post.Id, direction, true);
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Ruqqus
         {
             if (string.IsNullOrEmpty(postId))
                 throw new ArgumentNullException(nameof(postId));
-            return await SubmitVote("/api/v1/vote/post", postId, direction);
+            return await SubmitVote("/api/v1/vote/post", postId, direction, true);
         }
 
         /// <summary>
@@ -64,8 +64,9 @@ namespace Ruqqus
         /// <param name="url">The base URL of the POST endpoint for voting.</param>
         /// <param name="id">The ID of the post or comment.</param>
         /// <param name="direction">The type of vote to place.</param>
+        /// <param name="isPost"><c>true</c> if this  submission is a post, otherwise <c>false</c> if a comment.</param>
         /// <returns><c>true</c> if vote was submitted successfully, otherwise <c>false</c> if an error occured.</returns>
-        private async Task<bool> SubmitVote(string url, string id, VoteDirection direction)
+        private async Task<bool> SubmitVote(string url, string id, VoteDirection direction, bool isPost)
         {
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException(nameof(id));
@@ -78,7 +79,11 @@ namespace Ruqqus
             {
                 var response = await httpClient.PostAsync(uri, null);
                 var result = JsonHelper.Load<GenericResult>(await response.Content.ReadAsStreamAsync());
-                return !result.IsError;
+                if (result.IsError)
+                    return false;
+                
+                OnVoteSubmitted(id, direction, isPost);
+                return true;
             }
             catch (Exception)
             {
