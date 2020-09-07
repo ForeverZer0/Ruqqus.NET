@@ -3,6 +3,6 @@ solution: Ruqqus.NET.sln
 
 jobs:
   include:
-    - dotnet: 3.1.7
+    - dotnet: 2.1.502
+      mono: none
     - mono: latest
-    
