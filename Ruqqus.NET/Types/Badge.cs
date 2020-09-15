@@ -11,7 +11,7 @@ namespace Ruqqus
     /// Represents a earned trophy that is displayed on the user's account page.
     /// </summary>
     [DataContract]
-    public class Badge : IEquatable<Badge>
+    public class Badge : JsonObject<Badge>, IEquatable<Badge>
     {
         /// <summary>
         /// Gets the name of this badge.

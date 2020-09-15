@@ -13,7 +13,7 @@ namespace Ruqqus
     /// Represents an earned title that can be displayed with the username of an account.
     /// </summary>
     [DataContract]
-    public class Title : IEquatable<Title>
+    public class Title : JsonObject<Title>, IEquatable<Title>
     {
         /// <summary>
         /// Gets a unique ID used for identifying this entity.

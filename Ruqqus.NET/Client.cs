@@ -88,7 +88,7 @@ namespace Ruqqus
             var response = await client.GetAsync(uri);
 
             var result = await response.Content.ReadAsStringAsync();
-            // Just cheating this, not going to parse the JSON
+            // Just cheating this, not going to parse the JSON. It will only contain a true value when available.
             return Regex.IsMatch(result, @":true\b");
         }
 
@@ -121,7 +121,7 @@ namespace Ruqqus
         /// <summary>
         /// Gets or sets the authorization accessToken granting access to the client/
         /// </summary>
-        public OAuthToken Token
+        public Token Token
         {
             get => accessToken;
             set
@@ -134,97 +134,87 @@ namespace Ruqqus
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="Client"/> class.
+        /// Private constructor to initialize the internal HTTP client.
         /// </summary>
-        /// <param name="clientId">The client ID of the application requesting access.</param>
-        /// <param name="clientSecret">The client secret of the application requesting access.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the ID/secret is null or empty.</exception>
-        public Client([NotNull] string clientId, [NotNull] string clientSecret)
+        private Client()
         {
-            ClientId = clientId ?? throw new ArgumentNullException(nameof(clientId));
-            ClientSecret = clientSecret ?? throw new ArgumentNullException(nameof(clientSecret));
-
             httpClient = new HttpClient { BaseAddress = new Uri("https://ruqqus.com") };
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
-
+        
         /// <summary>
-        /// Creates a new instance of the <see cref="Client"/> class with the specified <see cref="OAuthToken"/>.
+        /// Creates a new instance of the <see cref="Client"/> class.
         /// </summary>
-        /// <param name="clientId">The client ID of the application requesting access.</param>
-        /// <param name="clientSecret">The client secret of the application requesting access.</param>
-        /// <param name="token">A previously authorized access accessToken.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the ID/secret is null or empty.</exception>
-        public Client([NotNull] string clientId, [NotNull] string clientSecret, [NotNull] OAuthToken token) : 
-            this(clientId, clientSecret)
+        /// <param name="clientInfo">A <see cref="ClientInfo"/> object describing the application.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="clientInfo"/> is <c>null</c>.</exception>
+        public Client([NotNull] ClientInfo clientInfo) : this()
+        {
+            Info = clientInfo ?? throw new ArgumentNullException(nameof(clientInfo));
+        }
+        
+        /// <summary>
+        /// Creates a new instance of the <see cref="Client"/> class.
+        /// </summary>
+        /// <param name="clientInfo">A <see cref="ClientInfo"/> object describing the application.</param>
+        /// <param name="token">A previously authorized access token.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the <paramref name="clientInfo"/> is <c>null</c>.</exception>
+        public Client([NotNull] ClientInfo clientInfo, Token token) : this(clientInfo)
         {
             Token = token ?? throw new ArgumentNullException(nameof(token));
         }
 
         /// <summary>
-        /// Authorizes the application to perform actions as a user, using the authorization code from the redirect URL
-        /// when the user made approval.
+        /// Creates a new instance of the <see cref="Client"/> class.
         /// </summary>
-        /// <param name="code">The authorization code from the redirect URL.</param>
-        /// <param name="persist">Flag indicating if this accessToken will persist and be reused more than once.</param>
-        /// <returns>A newly created access accessToken.</returns>
-        /// <remarks>This action can only be performed once per code, and will fail otherwise.</remarks>
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
-        public async Task<OAuthToken> GrantTokenAsync([NotNull] string code, bool persist = true)
+        /// <param name="clientId">The client ID of the application requesting access.</param>
+        /// <param name="clientSecret">The client secret of the application requesting access.</param>
+        /// <param name="redirectUrl">The redirect URL to receive the confirmation code used when a user grants access to the client.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the ID/secret/redirect is <c>null</c> or empty.</exception>
+        public Client([NotNull] string clientId, [NotNull] string clientSecret, string redirectUrl) : this()
         {
-            var uri = new Uri("/oauth/grant", UriKind.Relative);
-            var token = await PostForm<OAuthToken>(uri,
-                new[]
-                {
-                    new KeyValuePair<string, string>("grant_type", "code"),
-                    new KeyValuePair<string, string>("client_id", ClientId),
-                    new KeyValuePair<string, string>("client_secret", ClientSecret),
-                    new KeyValuePair<string, string>("code", code),
-                    new KeyValuePair<string, string>("permanent", persist ? "persist" : "nope"),
-                });
-
-            OnTokenGranted(token);
-            return token;
+            Info = new ClientInfo(clientId, clientSecret, redirectUrl);
         }
-
+        
         /// <summary>
-        /// Refreshes a stale access accessToken as needed. 
+        /// Creates a new instance of the <see cref="Client"/> class.
         /// </summary>
-        /// <returns>A task indicating <c>true</c> if access accessToken was refreshed, otherwise <c>false</c>.</returns>
+        /// <param name="clientId">The client ID of the application requesting access.</param>
+        /// <param name="clientSecret">The client secret of the application requesting access.</param>
+        /// <param name="redirectUrl">The redirect URL to receive the confirmation code used when a user grants access to the client.</param>
+        ///  <param name="token">A previously authorized access token.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the ID/secret/redirect is <c>null</c> or empty.</exception>
+        public Client([NotNull] string clientId, [NotNull] string clientSecret, [NotNull] string redirectUrl, [NotNull] Token token) 
+            : this(clientId, clientSecret, redirectUrl)
+        {
+            Token = token ?? throw new ArgumentNullException(nameof(token));
+        }
+        
+        
+        
+
+
+
+
+   
         [Authorization(AuthorityKind.None, OAuthScope.None)]
         public async Task<bool> RefreshTokenAsync()
         {
-            if (Token?.RefreshToken is null || Token.RemainingSeconds > OAuthToken.RefreshMargin)
-                return false;
-
-            // Can't call PostForm here, would cause a stack overflow (ask me how I know)
-            var uri = new Uri("/oauth/grant", UriKind.Relative);
-            var content = new FormUrlEncodedContent(new[]
+            if (await OAuth.RefreshAsync(Info, accessToken))
             {
-                new KeyValuePair<string, string>("grant_type", "refresh"),
-                new KeyValuePair<string, string>("client_id", ClientId),
-                new KeyValuePair<string, string>("client_secret", ClientSecret),
-                new KeyValuePair<string, string>("refresh_token", Token.RefreshToken),
-            });
-
-            var response = await httpClient.PostAsync(uri, content);
-            response.EnsureSuccessStatusCode();
-
-            var refreshToken = JsonHelper.Load<OAuthToken>(await response.Content.ReadAsStreamAsync());
-            accessToken.Update(refreshToken);
-            var header = new AuthenticationHeaderValue(accessToken.Type, accessToken.AccessToken);
-            httpClient.DefaultRequestHeaders.Authorization = header;
-            
-            OnTokenRefreshed(refreshToken);
-            return true;
+                var header = new AuthenticationHeaderValue(accessToken.Type, accessToken.AccessToken);
+                httpClient.DefaultRequestHeaders.Authorization = header;
+                return true;
+            }
+            return false;
         }
-        
-        protected readonly string ClientId;
-        protected readonly string ClientSecret;
-        private readonly HttpClient httpClient;
-        private OAuthToken accessToken;
 
+        public ClientInfo Info { get; }
+        
+        private readonly HttpClient httpClient;
+        private Token accessToken;
+
+        /// <inheritdoc />
         public void Dispose() => httpClient.Dispose();
 
         private async Task<T> PostForm<T>(Uri uri, IEnumerable<KeyValuePair<string, string>> parameters)

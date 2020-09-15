@@ -11,7 +11,7 @@ namespace Ruqqus
     /// Abstract base class for all major API entities.
     /// </summary>
     [DataContract]
-    public abstract class ItemBase : IEquatable<ItemBase>
+    public abstract class ItemBase : JsonObject<ItemBase>, IEquatable<ItemBase>
     {
         /// <summary>
         /// Gets a unique ID used for identifying this entity.

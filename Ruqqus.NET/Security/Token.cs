@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Runtime.Serialization;
+using Ruqqus.Helpers;
 
 namespace Ruqqus.Security
 {
@@ -8,7 +10,7 @@ namespace Ruqqus.Security
     /// Represents an OAuth2 token for the Ruqqus.
     /// </summary>
     [DataContract]
-    public class OAuthToken
+    public class Token : JsonObject<Token>
     {
         /// <summary>
         /// The threshold (in seconds) of remaining time for the access token before it will refresh.
@@ -62,6 +64,11 @@ namespace Ruqqus.Security
         }
 
         /// <summary>
+        /// Gets a flag indicating if access token is stale and needs regenerated.
+        /// </summary>
+        public bool NeedRefresh => RefreshToken != null && RemainingSeconds <= RefreshMargin;
+
+        /// <summary>
         /// Gets the scope of the features the application has been authorized to perform.
         /// </summary>
         public OAuthScope Scope
@@ -80,13 +87,13 @@ namespace Ruqqus.Security
                 return scope;
             }
         }
-
+        
         /// <summary>
         /// Updates this instance with the <see cref="AccessToken"/> and <see cref="ExpirationTime"/> values of
         /// <paramref name="token"/>.
         /// </summary>
         /// <param name="token">A refreshed token containing the updated values.</param>
-        public void Update([NotNull] OAuthToken token)
+        public void Update([NotNull] Token token)
         {
             AccessToken = token.AccessToken;
             expiresUtc = token.expiresUtc;

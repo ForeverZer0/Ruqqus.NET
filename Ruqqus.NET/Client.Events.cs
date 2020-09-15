@@ -114,39 +114,9 @@ namespace Ruqqus
             Comment = comment;
         }
     }
-    
-    /// <summary>
-    /// Arguments used for when OAuth token events.
-    /// </summary>
-    public class TokenEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Gets the token that was refreshed.
-        /// </summary>
-        public OAuthToken Token { get; }
 
-        /// <summary>
-        /// Creates a new instance of the <see cref="TokenEventArgs"/>.
-        /// </summary>
-        /// <param name="token">The token that has raised the event.</param>
-        public TokenEventArgs([NotNull] OAuthToken token)
-        {
-            Token = token ?? throw new ArgumentNullException(nameof(token));
-        }
-    }
-    
     public partial class Client
     {
-        /// <summary>
-        /// Occurs when the client's current access accessToken is refreshed.
-        /// </summary>
-        public event ClientEventHandler<TokenEventArgs> TokenRefreshed;
-
-        /// <summary>
-        /// Occurs when the client grants access to a new <see cref="OAuthToken"/>.
-        /// </summary>
-        public event ClientEventHandler<TokenEventArgs> TokenGranted; 
-        
         /// <summary>
         /// Occurs when a post or comment is voted on.
         /// </summary>
@@ -161,16 +131,7 @@ namespace Ruqqus
         /// Occurs when a comment is created with the API.
         /// </summary>
         public event ClientEventHandler<CommentEventArgs> CommentCreated;
-
-        /// <summary>
-        /// Invokes the <see cref="TokenRefreshed"/> event.
-        /// </summary>
-        /// <param name="token">A token containing the new access code.</param>
-        protected virtual void OnTokenRefreshed(OAuthToken token)
-        {
-            TokenRefreshed?.Invoke(this, new TokenEventArgs(token));
-        }
-
+        
         /// <summary>
         /// Invokes the <see cref="VoteSubmitted"/> event.
         /// </summary>
@@ -198,15 +159,6 @@ namespace Ruqqus
         protected virtual void OnCommentCreated([CanBeNull] Comment comment)
         {
             CommentCreated?.Invoke(this, new CommentEventArgs(comment));
-        }
-
-        /// <summary>
-        /// Invokes the <see cref="TokenGranted"/> event.
-        /// </summary>
-        /// <param name="token">The new token that was granted access.</param>
-        public virtual void OnTokenGranted([CanBeNull] OAuthToken token)
-        {
-            TokenGranted?.Invoke(this, new TokenEventArgs(token));
         }
     }
 }
