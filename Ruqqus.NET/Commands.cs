@@ -10,10 +10,9 @@ namespace Ruqqus
     public partial class Client
     {
         [Obsolete("Experimental features, do not use.")]
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         public async Task<bool> LoginAsync(string username, string password)
         {
-            
             var form = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("username", username),
@@ -34,12 +33,11 @@ namespace Ruqqus
         }
 
         [Obsolete("Experimental features, do not use.")]
-        [Authorization(AuthorityKind.Required, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         public async Task<bool> SubscribeAsync(string guildName)
         {
             if (string.IsNullOrWhiteSpace(guildName) || !ValidGuildName.IsMatch(guildName))
                 return false;
-            
             
             var uri = new Uri($"/api/subscribe/{guildName}", UriKind.Relative);
             var response = await httpClient.PostAsync(uri, null);

@@ -11,7 +11,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="comment">A <see cref="Comment"/> instance that was created by this user.</param>
         /// <returns><c>true</c> if operation completed successfully, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Delete)]
+        [Scope(OAuthScope.Delete)]
         public async Task<bool> DeleteComment([NotNull] Comment comment)
         {
             if (comment is null)
@@ -24,7 +24,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="commentId">The ID of a <see cref="Comment"/> that was created by this user.</param>
         /// <returns><c>true</c> if operation completed successfully, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Delete)]
+        [Scope(OAuthScope.Delete)]
         public async Task<bool> DeleteComment([NotNull] string commentId)
         {
             if (string.IsNullOrEmpty(commentId))

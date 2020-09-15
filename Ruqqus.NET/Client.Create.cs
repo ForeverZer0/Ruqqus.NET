@@ -18,7 +18,7 @@ namespace Ruqqus
         /// <param name="text">The text body of the comment (Markdown supported).</param>
         /// <returns>The newly created <see cref="Comment"/> that was posted.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="parent"/> or <paramref name="text"/> is <c>null</c>.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Comment> ReplyToComment([NotNull] Comment parent, [NotNull] string text)
         {
             if (parent is null)
@@ -33,7 +33,7 @@ namespace Ruqqus
         /// <param name="text">The text body of the comment (Markdown supported).</param>
         /// <returns>The newly created <see cref="Comment"/> that was posted.</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="commentId"/> is invalid.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Comment> ReplyToComment([NotNull] string commentId, [NotNull] string text)
         {
             var parent = await GetCommentAsync(commentId);
@@ -49,7 +49,7 @@ namespace Ruqqus
         /// <param name="text">The text body of the comment (Markdown supported).</param>
         /// <returns>The newly created <see cref="Comment"/> that was posted.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="parent"/> or <paramref name="text"/> is <c>null</c>.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Comment> ReplyToPost([NotNull] Post parent, [NotNull] string text)
         {
             if (parent is null)
@@ -64,7 +64,7 @@ namespace Ruqqus
         /// <param name="text">The text body of the comment (Markdown supported).</param>
         /// <returns>The newly created <see cref="Comment"/> that was posted.</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="postId"/> is invalid.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Comment> ReplyToPost([NotNull] string postId, [NotNull] string text)
         {
             var parent = await GetPostAsync(postId);
@@ -80,7 +80,7 @@ namespace Ruqqus
         /// <param name="title">The title of the post.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreatePost([NotNull] Guild guild, [NotNull] string title, [NotNull] string text)
         {
             if (guild is null)
@@ -95,7 +95,7 @@ namespace Ruqqus
         /// <param name="title">The title of the post.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreatePost([NotNull] string guildName, [NotNull] string title, [NotNull] string text)
         {
             return await CreatePost(guildName, title, text, null, null);
@@ -109,7 +109,7 @@ namespace Ruqqus
         /// <param name="imagePath">The path to an image file.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreateImagePost([NotNull] Guild guild, [NotNull] string title,
             [NotNull] string imagePath, [CanBeNull] string text = null)
         {
@@ -126,7 +126,7 @@ namespace Ruqqus
         /// <param name="imagePath">The path to an image file.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreateImagePost([NotNull] string guildName, [NotNull] string title,
             [NotNull] string imagePath, [CanBeNull] string text = null)
         {
@@ -141,7 +141,7 @@ namespace Ruqqus
         /// <param name="url">The a URL to share.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreateUrlPost([NotNull] Guild guild, [NotNull] string title, [NotNull] string url,
             [CanBeNull] string text = null)
         {
@@ -158,7 +158,7 @@ namespace Ruqqus
         /// <param name="url">The a URL to share.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreateUrlPost([NotNull] string guildName, [NotNull] string title, [NotNull] string url,
             [CanBeNull] string text = null)
         {
@@ -173,7 +173,7 @@ namespace Ruqqus
         /// <param name="url">The a URL to share.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreateUrlPost([NotNull] Guild guild, [NotNull] string title, [NotNull] Uri url,
             [CanBeNull] string text = null)
         {
@@ -190,7 +190,7 @@ namespace Ruqqus
         /// <param name="url">The a URL to share.</param>
         /// <param name="text">The text body of the post/</param>
         /// <returns>The newly created <see cref="Post"/> that was just created on Ruqqus.</returns>
-        [Authorization(AuthorityKind.Required, OAuthScope.Create)]
+        [Scope(OAuthScope.Create)]
         public async Task<Post> CreateUrlPost([NotNull] string guildName, [NotNull] string title, [NotNull] Uri url,
             [CanBeNull] string text = null)
         {

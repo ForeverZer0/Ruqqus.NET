@@ -17,7 +17,7 @@ namespace Ruqqus
         /// <param name="username">The username of the account to retrieve.</param>
         /// <returns>A <see cref="User"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="username"/> is not well-formatted.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
+        [Scope(OAuthScope.Read)]
         public async Task<User> GetUserAsync([NotNull] string username)
         {
             if (!IsValidUsername(username))
@@ -31,7 +31,7 @@ namespace Ruqqus
         /// <param name="commentId">The ID of the comment to retrieve.</param>
         /// <returns>A <see cref="Comment"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="commentId"/> is not well-formatted.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
+        [Scope(OAuthScope.Read)]
         public async Task<Comment> GetCommentAsync([NotNull] string commentId)
         {
             if (!IsValidSubmissionId(commentId))
@@ -45,7 +45,7 @@ namespace Ruqqus
         /// <param name="postId">The ID of the post to retrieve.</param>
         /// <returns>A <see cref="Post"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="postId"/> is not well-formatted.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
+        [Scope(OAuthScope.Read)]
         public async Task<Post> GetPostAsync([NotNull] string postId)
         {
             if (!IsValidSubmissionId(postId))
@@ -59,7 +59,7 @@ namespace Ruqqus
         /// <param name="guildName">The name of the guild to retrieve.</param>
         /// <returns>A <see cref="Guild"/> instance of <c>null</c> if not found.</returns>
         /// <exception cref="FormatException">Thrown when the <paramref name="guildName"/> is not well-formatted.</exception>
-        [Authorization(AuthorityKind.Required, OAuthScope.Read)]
+        [Scope(OAuthScope.Read)]
         public async Task<Guild> GetGuildAsync([NotNull] string guildName)
         {
             if (!IsValidGuildName(guildName))

@@ -57,7 +57,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="username">A username to query.</param>
         /// <returns><c>true</c> if the username is both valid and available, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         public static async Task<bool> IsUsernameAvailable([CanBeNull] string username)
         {
             return await IsAvailable("https://ruqqus.com/api/is_available/", ValidUsername, username);
@@ -68,13 +68,13 @@ namespace Ruqqus
         /// </summary>
         /// <param name="guildName">A username to query.</param>
         /// <returns><c>true</c> if the guild name is both valid and available, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         public static async Task<bool> IsGuildNameAvailable([CanBeNull] string guildName)
         {
             return await IsAvailable("https://ruqqus.com/api/board_available/", ValidGuildName, guildName);
         }
         
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         private static async Task<bool> IsAvailable(string route, Regex validator, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -97,7 +97,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="username">The username to check.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         public static bool IsValidUsername([CanBeNull] string username) =>
             username != null && ValidUsername.IsMatch(username);
 
@@ -106,7 +106,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="guildName">The name of the guild.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         public static bool IsValidGuildName([CanBeNull] string guildName) =>
             guildName != null && ValidGuildName.IsMatch(guildName);
 
@@ -115,7 +115,7 @@ namespace Ruqqus
         /// </summary>
         /// <param name="id">The ID for a post or comment.</param>
         /// <returns><c>true</c> if input string is valid, otherwise <c>false</c>.</returns>
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
+        [Scope(OAuthScope.None)]
         public static bool IsValidSubmissionId([CanBeNull] string id) => id != null && ValidSubmission.IsMatch(id);
 
         /// <summary>
@@ -192,12 +192,6 @@ namespace Ruqqus
         
         
         
-
-
-
-
-   
-        [Authorization(AuthorityKind.None, OAuthScope.None)]
         public async Task<bool> RefreshTokenAsync()
         {
             if (await OAuth.RefreshAsync(Info, accessToken))
