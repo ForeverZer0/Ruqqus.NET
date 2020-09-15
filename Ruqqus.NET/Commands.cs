@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -9,6 +10,12 @@ namespace Ruqqus
 {
     public partial class Client
     {
+        /// <summary>
+        /// Performs login feature as headless browser.
+        /// </summary>
+        /// <param name="username">The username of account.</param>
+        /// <param name="password">The password of the account.</param>
+        /// <returns><c>true</c> if login was successful, otherwise <c>false</c>.</returns>
         [Obsolete("Experimental features, do not use.")]
         [Scope(OAuthScope.None)]
         public async Task<bool> LoginAsync(string username, string password)
@@ -24,6 +31,11 @@ namespace Ruqqus
             return response.IsSuccessStatusCode;
         }
 
+        /// <summary>
+        /// Subscribes the currently logged in user to the specified guild.
+        /// </summary>
+        /// <param name="guild">The guild to subscribe to.</param>
+        /// <returns><c>true</c> if guild was successfully joined, otherwise <c>false</c>.</returns>
         [Obsolete("Experimental features, do not use.")]
         public async Task<bool> SubscribeAsync(Guild guild)
         {
@@ -32,6 +44,11 @@ namespace Ruqqus
             return await SubscribeAsync(guild.Name);
         }
 
+        /// <summary>
+        /// Subscribes the currently logged in user to the specified guild.
+        /// </summary>
+        /// <param name="guildName">The name of the guild to subscribe to.</param>
+        /// <returns><c>true</c> if guild was successfully joined, otherwise <c>false</c>.</returns>
         [Obsolete("Experimental features, do not use.")]
         [Scope(OAuthScope.None)]
         public async Task<bool> SubscribeAsync(string guildName)

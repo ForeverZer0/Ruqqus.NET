@@ -205,7 +205,7 @@ namespace Ruqqus.Security
                 var redirectUrl = info.RedirectUrl.EndsWith('/') ? info.RedirectUrl : info.RedirectUrl + '/';
                 listener.Prefixes.Add(redirectUrl);
                 listener.Start();
-                OSHelper.OpenInBrowser(authorizeUrl);
+                OpenInBrowser(authorizeUrl);
 
                 // The GetContext method blocks while waiting for a request.
                 var context = listener.GetContext();
@@ -293,5 +293,29 @@ namespace Ruqqus.Security
 
             return string.Join(',', scopeNames);
         }
+        
+        /// <summary>
+        /// Opens the system's default browser and navigates to the specified link.
+        /// </summary>
+        /// <param name="url">The link to navigate the browser to in a new tab.</param>
+        private static void OpenInBrowser([NotNull] string url)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                Process.Start("xdg-open", url);
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                Process.Start("open", url);
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Because as usual Windows is has to be stupid about everything...
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            }
+            else
+            {
+                // Cross your fingers and hope for the best.
+                Process.Start(url);
+            }
+        }
+
     }
 }

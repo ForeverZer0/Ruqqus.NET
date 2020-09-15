@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ruqqus.Helpers;
 using Ruqqus.Security;
+// ReSharper disable MemberCanBePrivate.Global
 
 [assembly: CLSCompliant(true)]
 
@@ -24,6 +25,36 @@ namespace Ruqqus
         /// </summary>
         public static readonly string UserAgent;
 
+        /// <summary>
+        /// Gets or sets the authorization accessToken granting access to the client/
+        /// </summary>
+        public Token Token
+        {
+            get => accessToken;
+            set
+            {
+                accessToken = value;
+                httpClient.DefaultRequestHeaders.Authorization = value is null
+                    ? null
+                    : new AuthenticationHeaderValue(value.Type, value.AccessToken);
+            }
+        }
+        
+        /// <summary>
+        /// Gets the <see cref="ClientInfo"/> object describing this <see cref="Client"/>.
+        /// </summary>
+        public ClientInfo Info { get; }
+
+        /// <summary>
+        /// Private constructor to initialize the internal HTTP client.
+        /// </summary>
+        private Client()
+        {
+            httpClient = new HttpClient { BaseAddress = new Uri("https://ruqqus.com") };
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        }
+        
         /// <summary>
         /// Static initializer.
         /// </summary>
@@ -43,15 +74,7 @@ namespace Ruqqus
             CommentSerializer = new DataContractJsonSerializer(typeof(Comment));
             PostSerializer = new DataContractJsonSerializer(typeof(Post));
         }
-
-        private static readonly Regex ValidUsername;
-        private static readonly Regex ValidGuildName;
-        private static readonly Regex ValidSubmission;
-        private static readonly DataContractJsonSerializer UserSerializer;
-        private static readonly DataContractJsonSerializer GuildSerializer;
-        private static readonly DataContractJsonSerializer CommentSerializer;
-        private static readonly DataContractJsonSerializer PostSerializer;
-
+        
         /// <summary>
         /// Checks if the specified username is both valid and available.
         /// </summary>
@@ -119,31 +142,6 @@ namespace Ruqqus
         public static bool IsValidSubmissionId([CanBeNull] string id) => id != null && ValidSubmission.IsMatch(id);
 
         /// <summary>
-        /// Gets or sets the authorization accessToken granting access to the client/
-        /// </summary>
-        public Token Token
-        {
-            get => accessToken;
-            set
-            {
-                accessToken = value;
-                httpClient.DefaultRequestHeaders.Authorization = value is null
-                    ? null
-                    : new AuthenticationHeaderValue(value.Type, value.AccessToken);
-            }
-        }
-
-        /// <summary>
-        /// Private constructor to initialize the internal HTTP client.
-        /// </summary>
-        private Client()
-        {
-            httpClient = new HttpClient { BaseAddress = new Uri("https://ruqqus.com") };
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        }
-        
-        /// <summary>
         /// Creates a new instance of the <see cref="Client"/> class.
         /// </summary>
         /// <param name="clientInfo">A <see cref="ClientInfo"/> object describing the application.</param>
@@ -190,9 +188,11 @@ namespace Ruqqus
             Token = token ?? throw new ArgumentNullException(nameof(token));
         }
         
-        
-        
-        public async Task<bool> RefreshTokenAsync()
+        /// <summary>
+        /// Refreshes the token if required, and automatically updates the authorization header.
+        /// </summary>
+        /// <returns><c>true</c> if token was refreshed, otherwise <c>false</c>.</returns>
+        protected async Task<bool> RefreshTokenAsync()
         {
             if (await OAuth.RefreshAsync(Info, accessToken))
             {
@@ -202,11 +202,6 @@ namespace Ruqqus
             }
             return false;
         }
-
-        public ClientInfo Info { get; }
-        
-        private readonly HttpClient httpClient;
-        private Token accessToken;
 
         /// <inheritdoc />
         public void Dispose() => httpClient.Dispose();
@@ -222,5 +217,16 @@ namespace Ruqqus
             await using var stream = await response.Content.ReadAsStreamAsync();
             return JsonHelper.Load<T>(stream);
         }
+        
+        private readonly HttpClient httpClient;
+        private Token accessToken;
+        
+        private static readonly Regex ValidUsername;
+        private static readonly Regex ValidGuildName;
+        private static readonly Regex ValidSubmission;
+        private static readonly DataContractJsonSerializer UserSerializer;
+        private static readonly DataContractJsonSerializer GuildSerializer;
+        private static readonly DataContractJsonSerializer CommentSerializer;
+        private static readonly DataContractJsonSerializer PostSerializer;
     }
 }
