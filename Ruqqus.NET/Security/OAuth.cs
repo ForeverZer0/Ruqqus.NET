@@ -142,14 +142,13 @@ namespace Ruqqus.Security
         /// <param name="info">A <see cref="ClientInfo"/> object describing the authorized application.</param>
         /// <param name="scope">A set of flags indicating the permissions the application requires.</param>
         /// <param name="persist">Flag indicating if this access token will persist and be reused more than once.</param>
-        /// <param name="csrf">A unique token to mitigate cross-site request forgery (CSRF) attacks.</param>
         /// <returns>A full URL where a user can authorize the application in a browser.</returns>
         /// <seealso href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">Cross-Site Request Forgery</seealso>
-        public static string AuthorizationUrl(ClientInfo info, OAuthScope scope, bool persist, out string csrf)
+        public static string AuthorizationUrl(ClientInfo info, OAuthScope scope, bool persist)
         {
             var guid = Guid.NewGuid();
             var bytes = guid.ToByteArray();
-            csrf = Convert.ToBase64String(bytes);
+            var csrf = Convert.ToBase64String(bytes);
             
             return AuthorizationUrl(info, scope, persist, csrf);
         }
@@ -198,7 +197,7 @@ namespace Ruqqus.Security
             if (uri.Scheme != Uri.UriSchemeHttp || !uri.IsLoopback)
                 throw new UriFormatException("Redirect URL must be a localhost address with HTTP scheme.");
             
-            var authorizeUrl = AuthorizationUrl(info, scope, persist, out var unused);
+            var authorizeUrl = AuthorizationUrl(info, scope, persist);
             var listener = new HttpListener();
             
             try
