@@ -204,7 +204,30 @@ namespace Ruqqus
         }
 
         /// <inheritdoc />
-        public void Dispose() => httpClient.Dispose();
+        public void Dispose() => Dispose(true);
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> if being explicitly disposed, otherwise <c>false</c> if from finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+                OnDisposing();
+            httpClient.Dispose();
+            if (disposing)
+                OnDisposed();
+        }
+        
+        /// <summary>
+        /// Invokes the <see cref="Disposed"/> event.
+        /// </summary>
+        protected virtual void OnDisposed() => Disposed?.Invoke(this, EventArgs.Empty);
+
+        /// <summary>
+        /// Invokes the <see cref="Disposing"/> event.
+        /// </summary>
+        protected virtual void OnDisposing() => Disposing?.Invoke(this, EventArgs.Empty);
 
         private async Task<T> PostForm<T>(Uri uri, IEnumerable<KeyValuePair<string, string>> parameters)
         {

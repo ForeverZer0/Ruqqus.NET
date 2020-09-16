@@ -118,6 +118,16 @@ namespace Ruqqus
     public partial class Client
     {
         /// <summary>
+        /// Occurs when the <see cref="Client"/> is about to be disposed.
+        /// </summary>
+        public event ClientEventHandler<EventArgs> Disposing;
+
+        /// <summary>
+        /// Occurs when the <see cref="Client"/> has been disposed.
+        /// </summary>
+        public event ClientEventHandler<EventArgs> Disposed;
+
+        /// <summary>
         /// Occurs when a post or comment is voted on.
         /// </summary>
         public event ClientEventHandler<VoteEventArgs> VoteSubmitted;

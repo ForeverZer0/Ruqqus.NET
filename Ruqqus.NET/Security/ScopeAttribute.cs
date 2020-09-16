@@ -16,7 +16,6 @@ namespace Ruqqus.Security
         /// <summary>
         /// A new instance of the <see cref="ScopeAttribute"/> class.
         /// </summary>
-        /// <param name="kind">A flag indicating the authority level (login) required by the application for this functionality.</param>
         /// <param name="scope">A flag indicating the required scope (OAuth) required by the application for this functionality.</param>
         public ScopeAttribute(OAuthScope scope)
         {

@@ -32,6 +32,9 @@ namespace Ruqqus
         /// </summary>
         public Color Color => ColorHelper.FromHtml(color);
 
+        /// <summary>
+        /// Gets a value indicating the type of title this represents.
+        /// </summary>
         [field: DataMember(Name = "kind", IsRequired = true)]
         public int Kind { get; } // todo enum
 

@@ -4,115 +4,135 @@ using System.Threading.Tasks;
 
 namespace Ruqqus
 {
-
-    public class NewPostWatcher : ItemWatcher<Post>
-    {
-        private readonly string guildName;
-        
-        public NewPostWatcher(Client client, int refreshInterval, Guild guild) : this(client, refreshInterval, guild.Name)
-        {
-        }
-        
-        public NewPostWatcher(Client client, int refreshInterval, string guildName) : this(client, refreshInterval)
-        {
-            if (!Client.IsGuildNameAvailable(guildName).Result)
-                throw new ArgumentException($"A guild with the name \"{guildName}\" does not exist.", nameof(guildName));
-            this.guildName = guildName;
-        }
-        
-        public NewPostWatcher(Client client, int refreshInterval) : base(client, refreshInterval)
-        {
-        }
-        
-        protected override async Task CheckForContent(DateTime lastCheck)
-        {
-            await foreach (var post in Client.GetAllPosts())
-            {
-                Console.WriteLine(lastCheck);
-                if (post.CreationTime >= lastCheck)
-                {
-                    Console.WriteLine(post.Title);
-                    OnNewItemFound(post);
-                    continue;
-                }
-                break;
-            }
-        }
-    }
-    
-    
+    /// <summary>
+    /// Class used for event arguments pertaining to Ruqqus types.
+    /// </summary>
+    /// <typeparam name="T">A type derived from <see cref="ItemBase"/>.</typeparam>
     public class ItemEventArgs<T> : EventArgs where T : ItemBase
     {
+        /// <summary>
+        /// Gets the object that raised the event.
+        /// </summary>
+        [CanBeNull]
         public T Item { get; }
 
-        public ItemEventArgs(T item)
+        /// <summary>
+        /// Creates a new instance of the <see cref="ItemEventArgs{T}"/> class.
+        /// </summary>
+        /// <param name="item">The object that raised the event.</param>
+        public ItemEventArgs([CanBeNull] T item)
         {
             Item = item;
         }
     }
     
-    public abstract class ItemWatcher<T> where T : ItemBase
+    /// <summary>
+    /// Abstract base class for objects capable asynchronous monitoring for new content on Ruqqus.
+    /// </summary>
+    /// <typeparam name="T">A type derived from <see cref="ItemBase"/>.</typeparam>
+    public abstract class Watcher<T> where T : ItemBase
     {
-        /// <summary>
-        /// Gets the number of seconds between the content watcher queries for new content.
-        /// </summary>
-        public int Interval { get; }
-
         /// <summary>
         /// Gets the <see cref="Client"/> used for interacting with Ruqqus.
         /// </summary>
+        [NotNull]
         public Client Client { get; }
 
+        /// <summary>
+        /// Occurs when a new item has been detected in the area being monitored.
+        /// </summary>
+        public event EventHandler<ItemEventArgs<T>> ItemCreated;
+
+        /// <summary>
+        /// Occurs when monitoring begins.
+        /// </summary>
+        public event EventHandler Started;
+
+        /// <summary>
+        /// Occurs when monitoring stops.
+        /// </summary>
         public event EventHandler Stopped;
 
-        public event EventHandler<ItemEventArgs<T>> NewItemFound;
-
-        private bool cancelToken;
-        
-        public ItemWatcher(Client client, int refreshInterval)
+        /// <summary>
+        /// Initializer for the <see cref="Watcher{T}"/> class.
+        /// </summary>
+        /// <param name="client">A valid <see cref="Client"/> that will be used for queries.</param>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="client"/> is <c>null</c>.</exception>
+        protected Watcher([NotNull] Client client)
         {
-            if (refreshInterval < 1)
-                throw new ArgumentException("Refresh interval must be greater than 1.", nameof(refreshInterval));
-
-            Interval = refreshInterval * 1000;
+            Client = client ?? throw new ArgumentNullException(nameof(client));
+            cancelSource = new CancellationTokenSource();
+            cancelToken = cancelSource.Token;
         }
 
-        protected virtual void OnNewItemFound(T item)
+        /// <summary>
+        /// Begins asynchronously monitoring for new content.
+        /// </summary>
+        /// <param name="delay">The amount of time in between consecutive queries checking for new content.</param>
+        /// <returns>An awaitable task for this operation.</returns>
+        /// <seealso cref="Started"/>
+        /// <seealso cref="Stopped"/>
+        public async Task StartAsync(TimeSpan delay)
         {
-            NewItemFound?.Invoke(this, new ItemEventArgs<T>(item));
-        }
-        
-        public void Start()
-        {
-
-            // Already running, return
-            if (cancelToken)
-                return;
+            if (delay <= TimeSpan.Zero)
+                throw new ArgumentException(Strings.InvalidDelay, nameof(delay));
             
-            cancelToken = false;
-            Task.Factory.StartNew(() =>
+            OnStarted();
+            await Task.Run(async () =>
             {
-                while (true)
+                do
                 {
-                    var time = DateTime.Now;
-                    Thread.Sleep(Interval);
-                    if (cancelToken)
-                    {
-                        cancelToken = false;
-                        Stopped?.Invoke(this, EventArgs.Empty);
-                        break;
-                    }
-                    Console.WriteLine("POOP");
-                    CheckForContent(time);
-                }
-            });
+                    var time = DateTime.UtcNow;
+                    cancelToken.ThrowIfCancellationRequested();
+                    await Task.Delay(delay, cancelToken);
+                    await CheckForContent(time, cancelToken);
+                } while (!cancelToken.IsCancellationRequested);
+            }, cancelToken);
+            OnStopped();
         }
 
-        public void Stop()
+        /// <summary>
+        /// When overriden in a derived class, performs class-specific operations to check for new content since the
+        /// specified <paramref name="time"/>.
+        /// </summary>
+        /// <param name="time">The time determining the threshold where new content should be ignored.</param>
+        /// <param name="token">A token for cancelling any asynchronous tasks the method may implement.</param>
+        /// <returns>An awaitable task to perform this operation asynchronously.</returns>
+        protected abstract Task CheckForContent(DateTime time, [NotNull] CancellationToken token);
+
+        /// <summary>
+        /// Stops asynchronous operations and cancels monitoring.
+        /// </summary>
+        /// <seealso cref="Stopped"/>
+        public void Stop() => cancelSource.Cancel();
+
+        /// <summary>
+        /// Invokes the <see cref="ItemCreated"/> event.
+        /// </summary>
+        /// <param name="item"></param>
+        protected void OnItemCreated(T item) => ItemCreated?.Invoke(this, new ItemEventArgs<T>(item));
+
+        /// <summary>
+        /// Raises the <see cref="Started"/> event.
+        /// </summary>
+        protected virtual void OnStarted()
         {
-            cancelToken = true;
+            Client.Disposing += OnClientDisposing;
+            Started?.Invoke(this, EventArgs.Empty);
         }
 
-        protected abstract Task CheckForContent(DateTime lastCheck);
+        /// <summary>
+        /// Raises the <see cref="Stopped"/> event.
+        /// </summary>
+        protected virtual void OnStopped()
+        {
+            Client.Disposing -= OnClientDisposing;
+            Stopped?.Invoke(this, EventArgs.Empty);
+        }
+        
+        private void OnClientDisposing(Client client, EventArgs args) => cancelSource?.Cancel();
+
+        private readonly CancellationTokenSource cancelSource;
+        private readonly CancellationToken cancelToken;
     }
 }

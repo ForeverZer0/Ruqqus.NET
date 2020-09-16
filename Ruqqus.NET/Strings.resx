@@ -29,4 +29,7 @@
     <data name="Failed" xml:space="preserve">
         <value>Failed</value>
     </data>
+    <data name="InvalidDelay" xml:space="preserve">
+        <value>Delay must be greater than 0.</value>
+    </data>
 </root>

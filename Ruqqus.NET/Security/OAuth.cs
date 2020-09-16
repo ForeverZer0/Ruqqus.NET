@@ -235,8 +235,7 @@ namespace Ruqqus.Security
             return null;
         }
 
-
-        public static string GetResponseText(bool success)
+        private static string GetResponseText(bool success)
         {
             var buffer = new StringBuilder("<html>");
             buffer.Append(Strings.ResponseHead);

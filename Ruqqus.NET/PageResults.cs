@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Ruqqus
 {
     /// <summary>
-    /// Represents a "page" of results, where each page contains <see cref="Client.ResultsPerPage"/> results.
+    /// Represents a "page" of results, where each page contains <see cref="ResultsPerPage"/> results.
     /// </summary>
     /// <typeparam name="T">A type derived from <see cref="ItemBase"/> that is contained on the pages.</typeparam>
     [DataContract, KnownType(typeof(Guild)), KnownType(typeof(Post)), KnownType(typeof(Comment))]

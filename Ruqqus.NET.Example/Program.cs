@@ -18,9 +18,12 @@ namespace Ruqqus
 
             using (var client = new Client(info, token))
             {
-                var user = await client.GetUserAsync("foreverzer0");
-                Console.WriteLine(user.ToJson());
-                Console.WriteLine(user);
+                var watcher = new AllWatcher(client);
+                watcher.Started += (sender, eventArgs) => Console.WriteLine("Watching \"All\" for new posts...");
+                watcher.Stopped += (sender, eventArgs) => Console.WriteLine("Monitoring stopped");
+                watcher.ItemCreated += (sender, eventArgs) => Console.WriteLine(eventArgs.Item.Title);
+                
+                await watcher.StartAsync(TimeSpan.FromSeconds(15));
             }
         }
     }
