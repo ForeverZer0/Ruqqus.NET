@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using Ruqqus.Helpers;
 using Ruqqus.Security;
 // ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMethodReturnValue.Global
 
 [assembly: CLSCompliant(true)]
 
@@ -26,7 +29,7 @@ namespace Ruqqus
         public static readonly string UserAgent;
 
         /// <summary>
-        /// Gets or sets the authorization accessToken granting access to the client/
+        /// Gets or sets the authorization accessToken granting access to the client.
         /// </summary>
         public Token Token
         {
@@ -192,6 +195,7 @@ namespace Ruqqus
         /// Refreshes the token if required, and automatically updates the authorization header.
         /// </summary>
         /// <returns><c>true</c> if token was refreshed, otherwise <c>false</c>.</returns>
+        [Scope(OAuthScope.None)]
         protected async Task<bool> RefreshTokenAsync()
         {
             if (await OAuth.RefreshAsync(Info, accessToken))

@@ -37,5 +37,37 @@ namespace Ruqqus
             var response = await httpClient.PostAsync(uri, null);
             return response.IsSuccessStatusCode;
         }
+        
+        /// <summary>
+        /// Deletes a previously created post.
+        /// </summary>
+        /// <param name="post">A <see cref="Post"/> instance that was created by this user.</param>
+        /// <returns><c>true</c> if operation completed successfully, otherwise <c>false</c>.</returns>
+        [Scope(OAuthScope.Delete)]
+        public async Task<bool> DeletePost([NotNull] Post post)
+        {
+            if (post is null)
+                throw new ArgumentNullException(nameof(post));
+            return await DeleteComment(post.Id);
+        }
+
+        /// <summary>
+        /// Deletes a previously created post.
+        /// </summary>
+        /// <param name="postId">The ID of a <see cref="Post"/> that was created by this user.</param>
+        /// <returns><c>true</c> if operation completed successfully, otherwise <c>false</c>.</returns>
+        [Scope(OAuthScope.Delete)]
+        public async Task<bool> DeletePost([NotNull] string postId)
+        {
+            if (string.IsNullOrEmpty(postId))
+                throw new ArgumentNullException(nameof(postId));
+            if (!ValidSubmission.IsMatch(postId))
+                throw new FormatException($"Invalid post ID \"{postId}\".");
+
+            await RefreshTokenAsync();
+            var uri = new Uri($"/api/v1/delete_post/{postId}", UriKind.Relative);
+            var response = await httpClient.PostAsync(uri, null);
+            return response.IsSuccessStatusCode;
+        }
     }
 }
