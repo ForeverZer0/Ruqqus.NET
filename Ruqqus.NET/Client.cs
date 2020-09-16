@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -44,7 +45,7 @@ namespace Ruqqus
         /// Gets the <see cref="ClientInfo"/> object describing this <see cref="Client"/>.
         /// </summary>
         public ClientInfo Info { get; }
-
+        
         /// <summary>
         /// Private constructor to initialize the internal HTTP client.
         /// </summary>
@@ -215,6 +216,7 @@ namespace Ruqqus
             if (disposing)
                 OnDisposing();
             httpClient.Dispose();
+            httpHandler?.Dispose();
             if (disposing)
                 OnDisposed();
         }
@@ -241,8 +243,9 @@ namespace Ruqqus
             return JsonHelper.Load<T>(stream);
         }
         
-        private readonly HttpClient httpClient;
+        private HttpClient httpClient;
         private Token accessToken;
+        private HttpClientHandler httpHandler;
         
         private static readonly Regex ValidUsername;
         private static readonly Regex ValidGuildName;

@@ -344,7 +344,10 @@ namespace Ruqqus
             do
             {
                 await RefreshTokenAsync();
-                var uri = new Uri($"{url}?sort={s}&filter={f}&page={++page}", UriKind.Relative);
+                // var uri = new Uri($"{url}?sort={s}&filter={f}&page={++page}", UriKind.Relative);
+                
+                var uri = new Uri($"https://ruqqus.com{url}?sort={s}&filter={f}&page={++page}", UriKind.Absolute);
+                
                 var response = await httpClient.GetAsync(uri);
                 if (!response.IsSuccessStatusCode)
                     break;
