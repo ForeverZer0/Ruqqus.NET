@@ -237,14 +237,14 @@ namespace Ruqqus.Security
 
         private static string GetResponseText(bool success)
         {
-            var buffer = new StringBuilder("<html>");
-            buffer.Append(Strings.ResponseHead);
-            if (success)
-                buffer.AppendFormat(Strings.ResponseBody, "#339966", Strings.Confirmed);
-            else
-                buffer.AppendFormat(Strings.ResponseBody, "#ff0000", Strings.Failed);
-            buffer.Append("</html>");
+            var buffer = new StringBuilder("<html><head> <style>.center{margin: 0; position: absolute; top: 50%; left: 50%; -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%);}</style></head>");
+            const string body = "<body><div class=\"center\"> <div><img src=\"https://raw.githubusercontent.com/ruqqus/ruqqus/master/ruqqus/assets/images/logo/ruqqus_text_logo.png\" alt=\"\" width=\"365\" height=\"92\"/></div><p style=\"text-align: center;\">&nbsp;</p><h1 style=\"text-align: center;\"><span style=\"color:{0};\"><strong>Authorization {1}</strong></span></h1> <p style=\"text-align: center;\">&nbsp;&nbsp;</p><p style=\"text-align: center;\"><span style=\"color: #808080;\">You can safely close the tab/browser and return to the application.</span></p></div></body></html>";
             
+            if (success)
+                buffer.AppendFormat(body, "#339966", "Confirmed");
+            else
+                buffer.AppendFormat(body, "#ff0000", "Failed");
+ 
             return buffer.ToString();
         }
         

@@ -75,7 +75,7 @@ namespace Ruqqus
         public async Task StartAsync(TimeSpan delay)
         {
             if (delay <= TimeSpan.Zero)
-                throw new ArgumentException(Strings.InvalidDelay, nameof(delay));
+                throw new ArgumentException("Delay must be greater than 0.", nameof(delay));
             
             OnStarted();
             await Task.Run(async () =>
