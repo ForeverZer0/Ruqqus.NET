@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.Serialization;
 using Ruqqus.Helpers;
 
@@ -25,6 +27,20 @@ namespace Ruqqus
         /// </summary>
         [field: DataMember(Name = "mods_count")]
         public int GuildmasterCount { get; }
+
+        /// <summary>
+        /// Gets a collection of <see cref="User"/> instances who are moderators of this guild.
+        /// </summary>
+        public IEnumerable<User> Guildmasters
+        {
+            get
+            {
+                if (gms is null)
+                    yield break;
+                foreach (var gm in gms)
+                    yield return gm;
+            }
+        }
 
         /// <summary>
         /// Gets the total number of members subscribed to the guild.
@@ -92,5 +108,7 @@ namespace Ruqqus
         [DataMember(Name = "banner_url")] private string bannerUrl;
 
         [DataMember(Name = "color")] private string color;
+        
+        [DataMember(Name = "guildmasters")] private List<User> gms;
     }
 }
