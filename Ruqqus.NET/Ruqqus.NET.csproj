@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
         <Title>Ruqqus.NET</Title>
         <Authors>ForeverZer0</Authors>
         <Description> A C# API implementation for Ruqqus, an open-source platform for online communities, free of censorship and moderator abuse by design.</Description>
@@ -15,6 +14,10 @@
         <PackageTags>ruqqus;reddit;guild;guilds;community;communities</PackageTags>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RootNamespace>Ruqqus</RootNamespace>
+        <PackageVersion>1.2.0</PackageVersion>
+        <AssemblyVersion>1.2.0</AssemblyVersion>
+        <FileVersion>1.2.0</FileVersion>
+        <TargetFrameworks>netstandard2.1;netcoreapp3.1</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
